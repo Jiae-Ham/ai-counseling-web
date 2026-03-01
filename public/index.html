@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로그인 — CareDesk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f0f2f5;
+      --surface: #fff;
+      --accent: #2563eb;
+      --accent2: #7c3aed;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --danger: #dc2626;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: radial-gradient(ellipse at 20% 50%, rgba(37, 99, 235, .06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, .05) 0%, transparent 50%);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 380px;
+      box-shadow: 0 4px 32px rgba(0, 0, 0, .08);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, .25);
+    }
+
+    .logo h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logo p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      background: #f9fafb;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+      background: #fff;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 6px;
+    }
+
+    .btn:hover {
+      opacity: .92;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 13px;
+      margin-top: 14px;
+      display: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, .4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <h1>CareDesk</h1>
+      <p>관리자 시스템에 로그인하세요</p>
+    </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">아이디</label>
+        <input id="username" type="text" placeholder="아이디 입력" autocomplete="username" required />
+      </div>
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" required />
+      </div>
+      <button class="btn" type="submit" id="loginBtn">로그인</button>
+      <div class="error" id="errorMsg"></div>
+    </form>
+  </div>
+  <script>
+    fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.success) redirect(d.data.role); });
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn'), err = document.getElementById('errorMsg');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>로그인 중...'; err.style.display = 'none';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
+        });
+        const data = await res.json();
+        if (data.success) redirect(data.data.role);
+        else { err.textContent = data.message; err.style.display = 'block'; btn.disabled = false; btn.textContent = '로그인'; }
+      } catch { err.textContent = '서버 오류'; err.style.display = 'block'; btn.disabled = false; btn.textContent = '로그인'; }
+    });
+    function redirect(role) { window.location.href = role === 'admin' ? '/admin.html' : '/counselor.html'; }
+  </script>
+</body>
+
+</html>

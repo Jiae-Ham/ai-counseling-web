@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 대시보드 — CareDesk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f2f5;
+            --surface: #fff;
+            --card: #f9fafb;
+            --hover: #f3f4f6;
+            --sel: #eff6ff;
+            --blue: #2563eb;
+            --purple: #7c3aed;
+            --glow: rgba(37, 99, 235, .12);
+            --text: #111827;
+            --muted: #6b7280;
+            --dim: #9ca3af;
+            --border: #e5e7eb;
+            --border2: #d1d5db;
+            --ok: #16a34a;
+            --warn: #d97706;
+            --err: #dc2626;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .ht {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .hs {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .hr {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ubadge {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btnlo {
+            background: #fff;
+            border: 1.5px solid var(--border2);
+            color: var(--muted);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .btnlo:hover {
+            border-color: var(--err);
+            color: var(--err);
+        }
+
+        /* Tabs */
+        .tabs {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            padding: 13px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 2.5px solid transparent;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+            font-weight: 700;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .tp {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tp.active {
+            display: flex;
+        }
+
+        /* Shared panel pieces */
+        .pcol {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .pcol:last-child {
+            border-right: none;
+        }
+
+        .phdr {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ptitle {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+        }
+
+        .psub {
+            font-size: 12px;
+            color: var(--dim);
+            margin-top: 2px;
+        }
+
+        .scrollable {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px;
+        }
+
+        .srchwrap {
+            padding: 9px 13px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .srchinp {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .srchinp:focus {
+            border-color: var(--blue);
+            background: #fff;
+        }
+
+        .srchinp::placeholder {
+            color: var(--dim);
+        }
+
+        /* Row styles */
+        .row {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .row:hover {
+            background: var(--hover);
+        }
+
+        .row.active {
+            background: var(--sel);
+            border-left: 3px solid var(--blue);
+        }
+
+        .rname {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rphone {
+            font-size: 12px;
+            color: var(--blue);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rphone::before {
+            content: '📱';
+            font-size: 10px;
+        }
+
+        .rsub {
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 2px;
+        }
+
+        .smeta {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .b-c {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .b-e {
+            background: #f3f4f6;
+            color: var(--muted);
+        }
+
+        .b-r {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .b-d {
+            background: #f9fafb;
+            color: var(--dim);
+        }
+
+        .mb {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            background: var(--glow);
+            color: var(--blue);
+            border: 1px solid rgba(37, 99, 235, .25);
+            font-weight: 600;
+        }
+
+        /* Chat area */
+        .chdr {
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cphone {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cphone::before {
+            content: '📱';
+        }
+
+        .csid {
+            font-size: 10px;
+            color: var(--dim);
+            margin-top: 2px;
+            font-family: monospace;
+        }
+
+        .cmb {
+            background: var(--glow);
+            border: 1.5px solid rgba(37, 99, 235, .3);
+            color: var(--blue);
+            font-size: 11px;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-weight: 700;
+        }
+
+        .chatarea {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--bg);
+        }
+
+        .chatarea::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chatarea::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px;
+        }
+
+        /* USER = LEFT, AI = RIGHT */
+        .mrow {
+            display: flex;
+            gap: 10px;
+            max-width: 78%;
+        }
+
+        .mrow.user {
+            align-self: flex-start;
+            flex-direction: row;
+        }
+
+        .mrow.assistant {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .mavt {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .mavt.user {
+            background: linear-gradient(135deg, var(--ok), #15803d);
+        }
+
+        .mavt.assistant {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+        }
+
+        .mbody {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .mrow.assistant .mbody {
+            align-items: flex-end;
+        }
+
+        .mrole {
+            font-size: 10px;
+            color: var(--dim);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .mbubl {
+            padding: 9px 13px;
+            border-radius: 13px;
+            font-size: 13px;
+            line-height: 1.65;
+            word-break: break-word;
+        }
+
+        .mrow.user .mbubl {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-top-left-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+        }
+
+        .mrow.assistant .mbubl {
+            background: var(--blue);
+            color: #fff;
+            border-top-right-radius: 3px;
+        }
+
+        .mtime {
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        /* === TAB 1 === */
+        .stafflayout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .stafflist {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .staffform {
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+
+        .srow {
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background .15s;
+        }
+
+        .srow:hover {
+            background: var(--hover);
+        }
+
+        .savt {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sinf {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sname {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .smta {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sact {
+            display: flex;
+            gap: 6px;
+        }
+
+        .bxs {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1.5px solid;
+            transition: all .15s;
+            font-weight: 600;
+        }
+
+        .btn-on {
+            border-color: var(--warn);
+            color: var(--warn);
+            background: #fffbeb;
+        }
+
+        .btn-on:hover {
+            background: #fef3c7;
+        }
+
+        .btn-off {
+            border-color: var(--ok);
+            color: var(--ok);
+            background: #f0fdf4;
+        }
+
+        .btn-off:hover {
+            background: #dcfce7;
+        }
+
+        .btn-del {
+            border-color: var(--err);
+            color: var(--err);
+            background: #fef2f2;
+        }
+
+        .btn-del:hover {
+            background: #fee2e2;
+        }
+
+        .fcard {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .fcard h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .field {
+            margin-bottom: 13px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--blue);
+            background: #fff;
+        }
+
+        .btnp {
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: opacity .2s;
+        }
+
+        .btnp:hover {
+            opacity: .9;
+        }
+
+        .flash {
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .flash.ok {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: var(--ok);
+        }
+
+        .flash.err {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--err);
+        }
+
+        /* === TAB 2 === */
+        .assignlayout {
+            display: grid;
+            grid-template-columns: 1fr 240px 1fr;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .scol {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .scol:last-child {
+            border-right: none;
+        }
+
+        .cbrow {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            transition: background .15s;
+        }
+
+        .cbrow:hover {
+            background: var(--hover);
+        }
+
+        .cbrow.sel {
+            background: var(--sel);
+            border-left: 3px solid var(--blue);
+        }
+
+        .cb {
+            width: 15px;
+            height: 15px;
+            margin-top: 3px;
+            accent-color: var(--blue);
+            flex-shrink: 0;
+        }
+
+        .crow {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .crow:hover {
+            background: var(--hover);
+        }
+
+        .crow.pick {
+            background: var(--sel);
+            border-left: 3px solid var(--purple);
+        }
+
+        .asrow {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btnua {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border2);
+            color: var(--muted);
+            background: #fff;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .15s;
+        }
+
+        .btnua:hover {
+            border-color: var(--err);
+            color: var(--err);
+        }
+
+        .aact {
+            padding: 13px 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--card);
+        }
+
+        .btna {
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btna:hover {
+            opacity: .9;
+        }
+
+        .btna:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .selcnt {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        /* Shared */
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 10px;
+            padding: 24px;
+        }
+
+        .ei {
+            font-size: 36px;
+            opacity: .45;
+        }
+
+        .et {
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .spin {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fi {
+            from {
+                opacity: 0;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .fi {
+            animation: fi .18s ease;
+        }
+
+        /* 입퇴근 상태 */
+        .dot-on {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, .2);
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .dot-off {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9ca3af;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        /* 자동배분 영역 */
+        .auto-assign-bar {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .auto-assign-bar label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .auto-assign-bar input[type=number] {
+            width: 60px;
+            padding: 5px 8px;
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            text-align: center;
+        }
+
+        .auto-assign-bar input[type=number]:focus {
+            border-color: var(--blue);
+        }
+
+        .btn-auto {
+            padding: 7px 14px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity .2s;
+            white-space: nowrap;
+        }
+
+        .btn-auto:hover {
+            opacity: .9;
+        }
+
+        .btn-auto:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">🤖</div>
+        <div>
+            <div class="ht">CareDesk Admin</div>
+            <div class="hs">관리자 대시보드</div>
+        </div>
+        <div class="hr">
+            <div class="ubadge">👑 <span id="adminName">관리자</span></div>
+            <button class="btnlo" onclick="logout()">로그아웃</button>
+        </div>
+    </header>
+    <div class="tabs">
+        <div class="tab active" data-tab="staff" onclick="st('staff')">👥 상담원 계정 관리</div>
+        <div class="tab" data-tab="assign" onclick="st('assign')">📋 상담 배분</div>
+        <div class="tab" data-tab="view" onclick="st('view')">💬 전체 상담 조회</div>
+    </div>
+    <div class="content">
+
+        <!-- TAB 1 -->
+        <div id="tab-staff" class="tp active">
+            <div class="stafflayout">
+                <div class="stafflist">
+                    <div class="phdr">
+                        <div class="ptitle">상담원 목록</div><span id="scnt"
+                            style="font-size:12px;color:var(--muted)"></span>
+                    </div>
+                    <div class="scrollable" id="staffList">
+                        <div class="loading">
+                            <div class="spin"></div>불러오는 중
+                        </div>
+                    </div>
+                </div>
+                <div class="staffform">
+                    <div class="fcard">
+                        <h3>➕ 계정 생성</h3>
+                        <div class="field"><label>이름</label><input id="f-name" type="text" placeholder="홍길동" /></div>
+                        <div class="field"><label>아이디</label><input id="f-user" type="text" placeholder="counselor01" />
+                        </div>
+                        <div class="field"><label>비밀번호</label><input id="f-pass" type="password"
+                                placeholder="••••••••" /></div>
+                        <div class="field"><label>권한</label><select id="f-role">
+                                <option value="counselor">상담원</option>
+                                <option value="admin">관리자</option>
+                            </select></div>
+                        <div id="sflash"></div>
+                        <button class="btnp" onclick="createStaff()">계정 생성</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2 -->
+        <div id="tab-assign" class="tp">
+            <div class="assignlayout">
+                <div class="scol">
+                    <div class="phdr">
+                        <div>
+                            <div class="ptitle">미배분 상담</div>
+                            <div id="ucnt" class="psub">불러오는 중...</div>
+                        </div>
+                        <button class="bxs btn-off" onclick="loadUnassigned()">새로고침</button>
+                    </div>
+                    <div id="aflash"></div>
+                    <div class="scrollable" id="unList">
+                        <div class="loading">
+                            <div class="spin"></div>불러오는 중
+                        </div>
+                    </div>
+                </div>
+                <div class="scol" style="background:var(--card)">
+                    <div class="phdr">
+                        <div class="ptitle">상담원 선택</div>
+                    </div>
+                    <div class="auto-assign-bar">
+                        <label>⚡ 자동 배분</label>
+                        <span style="font-size:11px;color:var(--muted)">1인당</span>
+                        <input type="number" id="perCounselor" value="5" min="1" max="50" />
+                        <span style="font-size:11px;color:var(--muted)">건씩</span>
+                        <button class="btn-auto" id="autoBtn" onclick="doAutoAssign()">⚡ 자동 배분</button>
+                    </div>
+                    <div class="scrollable" id="cPickList">
+                        <div class="loading">
+                            <div class="spin"></div>불러오는 중
+                        </div>
+                    </div>
+                    <div class="aact">
+                        <div class="selcnt" id="selCount">선택된 상담 0건</div>
+                        <button class="btna" id="assignBtn" disabled onclick="doAssign()">📌 수동 배분</button>
+                    </div>
+                </div>
+                <div class="scol">
+                    <div class="phdr">
+                        <div class="ptitle">배분된 상담</div>
+                        <div id="acName" class="psub">상담원을 선택하세요</div>
+                    </div>
+                    <div class="scrollable" id="asList">
+                        <div class="empty">
+                            <div class="ei">📋</div>
+                            <div class="et">상담원을 선택하면<br />배분된 상담 목록이 표시됩니다</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3 -->
+        <div id="tab-view" class="tp">
+            <div style="display:grid;grid-template-columns:240px 260px 1fr;flex:1;overflow:hidden;">
+                <!-- 전화번호 목록 -->
+                <div class="pcol">
+                    <div class="phdr">
+                        <div>
+                            <div class="ptitle">전화번호</div>
+                            <div class="psub" id="v-phoneCnt">불러오는 중...</div>
+                        </div>
+                    </div>
+                    <div class="srchwrap"><input class="srchinp" id="v-search" type="text" placeholder="전화번호 검색..."
+                            oninput="filterPhones()" /></div>
+                    <div class="scrollable" id="v-phoneList">
+                        <div class="loading">
+                            <div class="spin"></div>불러오는 중
+                        </div>
+                    </div>
+                </div>
+                <!-- 세션 목록 -->
+                <div class="pcol">
+                    <div class="phdr">
+                        <div class="ptitle">통화 세션</div>
+                        <div class="psub" id="v-sessSub">전화번호를 선택하세요</div>
+                    </div>
+                    <div class="scrollable" id="v-sessList">
+                        <div class="empty">
+                            <div class="ei">📋</div>
+                            <div class="et">전화번호를 선택하세요</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 대화 내역 -->
+                <div class="pcol" style="background:var(--bg)">
+                    <div class="chdr">
+                        <div>
+                            <div class="cphone" id="v-chatPhone"
+                                style="font-size:13px;font-weight:600;color:var(--muted)">세션을 선택하세요</div>
+                            <div class="csid" id="v-chatSid"></div>
+                        </div>
+                        <span id="v-msgBadge" class="cmb" style="display:none"></span>
+                    </div>
+                    <div class="chatarea" id="v-chat">
+                        <div class="empty">
+                            <div class="ei">💬</div>
+                            <div class="et">세션을 선택하면<br />대화 내역이 표시됩니다</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        let selCoId = null, selUn = new Set(), allPhones = [], selPhKey = null;
+
+        (async () => {
+            const me = await fetch('/api/auth/me').then(r => r.json());
+            if (!me.success || me.data.role !== 'admin') { location.href = '/'; return; }
+            document.getElementById('adminName').textContent = me.data.name;
+            loadStaff(); loadUnassigned(); loadCPick(); loadPhones();
+        })();
+
+        function st(t) {
+            document.querySelectorAll('.tab').forEach(e => e.classList.toggle('active', e.dataset.tab === t));
+            document.querySelectorAll('.tp').forEach(e => e.classList.toggle('active', e.id === 'tab-' + t));
+        }
+        async function logout() { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/'; }
+
+        // ── TAB 1 ──────────────────────────────────────────
+        async function loadStaff() {
+            const el = document.getElementById('staffList'), data = await api('/api/admin/staff');
+            document.getElementById('scnt').textContent = `총 ${(data || []).length}명`;
+            if (!data || !data.length) { el.innerHTML = empty('👤', '등록된 계정 없음'); return; }
+            el.innerHTML = data.map(s => `
+    <div class="srow fi">
+      <div class="savt" style="${s.role === 'admin' ? 'background:linear-gradient(135deg,#f59e0b,#ef4444)' : ''}">${s.name[0]}</div>
+      <div class="sinf">
+        <div class="sname">${esc(s.name)} ${s.role === 'admin' ? '<span style="font-size:10px;color:#f59e0b;font-weight:700">👑 관리자</span>' : ''}</div>
+        <div class="smta"><span>@${esc(s.username)}</span><span>담당 ${s.assigned_count}건</span>
+          <span class="badge ${s.is_active ? 'b-c' : 'b-e'}">${s.is_active ? '활성' : '비활성'}</span>
+          ${s.role === 'counselor' ? `<span><span class="${s.attendance_status === 'online' ? 'dot-on' : 'dot-off'}"></span>${s.attendance_status === 'online' ? '출근 중' : '미출근'}</span>` : ''}
+        </div>
+      </div>
+      <div class="sact">
+        ${s.role !== 'admin' ? `<button class="bxs ${s.is_active ? 'btn-on' : 'btn-off'}" onclick="toggleStaff(${s.id})">${s.is_active ? '비활성화' : '활성화'}</button>` : ''}
+        ${s.role !== 'admin' ? `<button class="bxs btn-del" onclick="delStaff(${s.id},'${esc(s.name)}')">삭제</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+        }
+        async function createStaff() {
+            const name = v('f-name'), username = v('f-user'), password = v('f-pass'), role = v('f-role');
+            if (!name || !username || !password) { fl('sflash', '필수 항목 입력하세요.', 'err'); return; }
+            const d = await fetch('/api/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, username, password, role }) }).then(r => r.json());
+            if (d.success) { fl('sflash', '계정 생성됨', 'ok');['f-name', 'f-user', 'f-pass'].forEach(id => document.getElementById(id).value = ''); loadStaff(); loadCPick(); }
+            else fl('sflash', d.message, 'err');
+        }
+        async function toggleStaff(id) { await fetch(`/api/admin/staff/${id}/toggle`, { method: 'PATCH' }); loadStaff(); loadCPick(); }
+        async function delStaff(id, name) {
+            if (!confirm(`"${name}" 계정을 삭제하시겠습니까?`)) return;
+            await fetch(`/api/admin/staff/${id}`, { method: 'DELETE' }); loadStaff(); loadCPick(); loadUnassigned();
+        }
+
+        // ── TAB 2 ──────────────────────────────────────────
+        async function loadUnassigned() {
+            const el = document.getElementById('unList');
+            el.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+            selUn.clear(); updBtn();
+            const data = await api('/api/admin/sessions/unassigned');
+            document.getElementById('ucnt').textContent = data ? `${data.length}건 (대화 있음)` : '실패';
+            if (!data || !data.length) { el.innerHTML = empty('✅', '미배분 상담이 없습니다'); return; }
+            el.innerHTML = data.map(s => `
+    <div class="cbrow fi" id="sr-${s.id}" onclick="togSel(${s.id},event)">
+      <input class="cb" type="checkbox" id="cb-${s.id}" onclick="event.stopPropagation();togSel(${s.id},event,true)" />
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">세션 #${s.id} <span class="mb">${s.msg_count}개</span></div>
+        <div style="font-size:12px;color:var(--blue);margin-top:2px">${s.phone || '번호없음'} · ${esc(s.name)}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">${fmt(s.start_at)}</div>
+      </div>
+    </div>
+  `).join('');
+        }
+        function togSel(id, evt, fromCb) {
+            const row = document.getElementById('sr-' + id), cb = document.getElementById('cb-' + id);
+            if (!fromCb) cb.checked = !cb.checked;
+            if (cb.checked) { selUn.add(id); row.classList.add('sel'); } else { selUn.delete(id); row.classList.remove('sel'); }
+            updBtn();
+        }
+        function updBtn() {
+            const n = selUn.size;
+            document.getElementById('selCount').textContent = `선택된 상담 ${n}건`;
+            document.getElementById('assignBtn').disabled = n === 0 || !selCoId;
+        }
+        async function loadCPick() {
+            const el = document.getElementById('cPickList'), data = await api('/api/admin/staff');
+            const cs = data ? data.filter(s => s.role === 'counselor' && s.is_active) : [];
+            if (!cs.length) { el.innerHTML = empty('👤', '활성 상담원 없음'); return; }
+            el.innerHTML = cs.map(c => `
+    <div class="crow fi ${c.id === selCoId ? 'pick' : ''}" onclick="pickC(${c.id},'${esc(c.name)}')">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="${c.attendance_status === 'online' ? 'dot-on' : 'dot-off'}"></span>
+        <span style="font-size:14px;font-weight:600">${esc(c.name)}</span>
+        <span style="font-size:11px;color:${c.attendance_status === 'online' ? 'var(--ok)' : 'var(--dim)'}">${c.attendance_status === 'online' ? '출근 중' : '미출근'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">@${esc(c.username)} · 담당 ${c.assigned_count}건</div>
+    </div>
+  `).join('');
+        }
+        function pickC(id, name) {
+            selCoId = id;
+            document.querySelectorAll('.crow').forEach(e => e.classList.remove('pick'));
+            event.currentTarget.classList.add('pick');
+            updBtn(); loadAssigned(id, name);
+        }
+        async function loadAssigned(cid, name) {
+            document.getElementById('acName').textContent = `${name}의 담당`;
+            const el = document.getElementById('asList');
+            el.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+            const data = await api(`/api/admin/staff/${cid}/sessions`);
+            if (!data || !data.length) { el.innerHTML = empty('📋', '배분된 상담 없음'); return; }
+            el.innerHTML = data.map(s => `
+    <div class="asrow fi">
+      <div>
+        <div style="font-size:13px;font-weight:600">세션 #${s.id} <span class="mb" style="margin-left:4px">${s.msg_count}</span></div>
+        <div style="font-size:11px;color:var(--blue)">${s.phone || '번호없음'} · ${esc(s.name)}</div>
+        <div style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</div>
+      </div>
+      <button class="btnua" onclick="doUnassign(${s.id})">해제</button>
+    </div>
+  `).join('');
+        }
+        async function doAssign() {
+            if (!selCoId || selUn.size === 0) return;
+            const btn = document.getElementById('assignBtn'); btn.disabled = true; btn.textContent = '배분 중...';
+            const d = await fetch('/api/admin/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionIds: [...selUn], counselorId: selCoId }) }).then(r => r.json());
+            btn.textContent = '📌 수동 배분';
+            if (d.success) { fl('aflash', `${d.assigned}건 배분 완료`, 'ok'); loadUnassigned(); loadCPick(); const nm = document.getElementById('acName').textContent.replace('의 담당', ''); loadAssigned(selCoId, nm); }
+            else fl('aflash', d.message, 'err');
+        }
+        async function doAutoAssign() {
+            const per = parseInt(document.getElementById('perCounselor').value) || 5;
+            const btn = document.getElementById('autoBtn'); btn.disabled = true; btn.textContent = '배분 중...';
+            const d = await fetch('/api/admin/auto-assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ perCounselor: per }) }).then(r => r.json());
+            btn.textContent = '⚡ 자동 배분'; btn.disabled = false;
+            if (d.success) {
+                const detail = d.details.map(x => `${x.name} ${x.count}건`).join(', ');
+                fl('aflash', `✅ 총 ${d.total}건 배분 완료 (${d.counselorCount}명: ${detail})`, 'ok');
+                loadUnassigned(); loadCPick();
+                if (selCoId) { const nm = document.getElementById('acName').textContent.replace('의 담당', ''); loadAssigned(selCoId, nm); }
+            } else fl('aflash', d.message, 'err');
+        }
+        async function doUnassign(id) {
+            await fetch('/api/admin/unassign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionIds: [id] }) });
+            loadUnassigned(); loadCPick();
+            const nm = document.getElementById('acName').textContent.replace('의 담당', '');
+            if (selCoId) loadAssigned(selCoId, nm);
+        }
+
+        // ── TAB 3 ──────────────────────────────────────────
+        async function loadPhones() {
+            const data = await api('/api/admin/phones');
+            allPhones = data || [];
+            document.getElementById('v-phoneCnt').textContent = `총 ${allPhones.length}개`;
+            renderPhones(allPhones);
+        }
+        function filterPhones() {
+            const q = document.getElementById('v-search').value;
+            renderPhones(allPhones.filter(p => (p.phone || '').includes(q) || (q.startsWith('uid') && !p.phone)));
+        }
+        function renderPhones(list) {
+            const el = document.getElementById('v-phoneList');
+            if (!list.length) { el.innerHTML = empty('📱', '전화번호 없음'); return; }
+            el.innerHTML = list.map(p => `
+    <div class="row fi ${p.phone_key === selPhKey ? 'active' : ''}" onclick="pickPhone('${esc(p.phone_key)}','${esc(p.phone || '')}')">
+      <div class="rname" style="font-size:14px">${p.phone ? p.phone : '<span style="color:var(--dim);font-weight:400;font-size:12px">전화번호 미등록</span>'}</div>
+      <div class="rsub">통화 세션 ${p.session_count}건</div>
+    </div>
+  `).join('');
+        }
+        async function pickPhone(key, phone) {
+            selPhKey = key;
+            renderPhones(allPhones.filter(p => (p.phone || '').includes(document.getElementById('v-search').value)));
+            document.getElementById('v-sessSub').textContent = phone || key;
+            const sEl = document.getElementById('v-sessList');
+            sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+            document.getElementById('v-chat').innerHTML = empty('💬', '세션을 선택하세요');
+            document.getElementById('v-chatPhone').textContent = '세션을 선택하세요';
+            document.getElementById('v-chatPhone').style.color = 'var(--muted)';
+            document.getElementById('v-chatSid').textContent = '';
+            document.getElementById('v-msgBadge').style.display = 'none';
+            const data = await api(`/api/admin/phones/${encodeURIComponent(key)}/sessions`);
+            if (!data || !data.length) { sEl.innerHTML = empty('📋', '대화 있는 세션 없음'); return; }
+            sEl.innerHTML = data.map(s => `
+    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
+      <div class="rname" style="font-size:13px">세션 #${s.id} <span class="mb">${s.msg_count}개</span></div>
+      <div class="smeta">
+        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
+        ${s.counselor_name ? `<span style="font-size:11px;color:var(--purple);font-weight:600">👤${esc(s.counselor_name)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+        }
+        async function pickSess(id, sid, phone, counselor, el) {
+            document.querySelectorAll('#v-sessList .row').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            const phpEl = document.getElementById('v-chatPhone');
+            phpEl.textContent = phone || `세션 #${id}`;
+            phpEl.style.color = phone ? 'var(--text)' : 'var(--muted)';
+            document.getElementById('v-chatSid').textContent = sid ? `Session: ${sid}` : counselor ? `담당: ${counselor}` : '';
+            document.getElementById('v-msgBadge').style.display = 'none';
+            const chat = document.getElementById('v-chat');
+            chat.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+            const data = await api(`/api/sessions/${id}/messages`);
+            if (!data || !data.length) { chat.innerHTML = empty('💬', '대화 내역이 없습니다'); return; }
+            const badge = document.getElementById('v-msgBadge');
+            badge.textContent = `${data.length}개`; badge.style.display = 'inline-block';
+            renderChat(chat, data);
+        }
+        function renderChat(el, data) {
+            el.innerHTML = data.map(m => `
+    <div class="mrow ${m.role} fi">
+      <div class="mavt ${m.role}">${m.role === 'user' ? '👤' : '🤖'}</div>
+      <div class="mbody">
+        <div class="mrole">${m.role === 'user' ? '사용자' : 'AI 상담사'}</div>
+        <div class="mbubl">${esc(m.content)}</div>
+        <div class="mtime">${fmt(m.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+            el.scrollTop = el.scrollHeight;
+        }
+
+        // ── helpers ──
+        async function api(u) { try { const r = await fetch(u); const d = await r.json(); return d.success ? d.data : null; } catch { return null; } }
+        function v(id) { return document.getElementById(id).value.trim(); }
+        function esc(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function fmt(dt) { if (!dt) return '-'; return new Date(dt).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+        function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT') || u.includes('ANSWER')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
+        function empty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
+        function fl(id, msg, type) { const el = document.getElementById(id); el.innerHTML = `<div class="flash ${type}">${msg}</div>`; setTimeout(() => { el.innerHTML = ''; }, 3000); }
+    </script>
+</body>
+
+</html>

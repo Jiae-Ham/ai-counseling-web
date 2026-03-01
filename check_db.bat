@@ -1,0 +1,1 @@
+docker exec ai-counseling-mysql mysql -ucounseling_user -pcounseling_pass ai_counseling -e "SELECT cs.id, u.name, u.phone, cs.status, COUNT(cm.id) as msg_count FROM call_session cs JOIN users u ON cs.user_id=u.id LEFT JOIN conversation_message cm ON cm.session_id=cs.id GROUP BY cs.id HAVING msg_count > 0 ORDER BY cs.id DESC LIMIT 10"

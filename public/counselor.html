@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>상담원 대시보드 — CareDesk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f2f5;
+            --surface: #fff;
+            --card: #f9fafb;
+            --hover: #f3f4f6;
+            --sel: #eff6ff;
+            --blue: #2563eb;
+            --green: #16a34a;
+            --purple: #7c3aed;
+            --text: #111827;
+            --muted: #6b7280;
+            --dim: #9ca3af;
+            --border: #e5e7eb;
+            --border2: #d1d5db;
+            --err: #dc2626;
+            --warn: #d97706;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--green), #15803d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .hr {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ubadge {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btnlo {
+            background: #fff;
+            border: 1.5px solid var(--border2);
+            color: var(--muted);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .btnlo:hover {
+            border-color: var(--err);
+            color: var(--err);
+        }
+
+        .stats {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            display: flex;
+            gap: 28px;
+            flex-shrink: 0;
+        }
+
+        .sn {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--blue);
+        }
+
+        .sl {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* 3-panel layout */
+        .main {
+            display: grid;
+            grid-template-columns: 240px 260px 1fr;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .pcol {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .pcol:last-child {
+            border-right: none;
+            background: var(--bg);
+        }
+
+        .phdr {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .ptitle {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+        }
+
+        .psub {
+            font-size: 12px;
+            color: var(--dim);
+            margin-top: 2px;
+        }
+
+        .srchwrap {
+            padding: 9px 13px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .srchinp {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .srchinp:focus {
+            border-color: var(--blue);
+            background: #fff;
+        }
+
+        .srchinp::placeholder {
+            color: var(--dim);
+        }
+
+        .scrollable {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px;
+        }
+
+        .row {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .row:hover {
+            background: var(--hover);
+        }
+
+        .row.active {
+            background: var(--sel);
+            border-left: 3px solid var(--blue);
+        }
+
+        .rname {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rsub {
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+
+        .mb {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: var(--blue);
+            border: 1px solid rgba(37, 99, 235, .25);
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .smeta {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .b-c {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .b-e {
+            background: #f3f4f6;
+            color: var(--muted);
+        }
+
+        .b-r {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .b-d {
+            background: #f9fafb;
+            color: var(--dim);
+        }
+
+        /* Chat — USER LEFT, AI RIGHT */
+        .chdr {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cphone {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cphone::before {
+            content: '📱';
+        }
+
+        .csid {
+            font-size: 10px;
+            color: var(--dim);
+            margin-top: 2px;
+            font-family: monospace;
+        }
+
+        .cmb {
+            background: #eff6ff;
+            border: 1.5px solid rgba(37, 99, 235, .3);
+            color: var(--blue);
+            font-size: 11px;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-weight: 700;
+        }
+
+        .chatarea {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chatarea::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chatarea::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px;
+        }
+
+        .mrow {
+            display: flex;
+            gap: 10px;
+            max-width: 78%;
+        }
+
+        .mrow.user {
+            align-self: flex-start;
+            flex-direction: row;
+        }
+
+        .mrow.assistant {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .mavt {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .mavt.user {
+            background: linear-gradient(135deg, var(--green), #15803d);
+        }
+
+        .mavt.assistant {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+        }
+
+        .mbody {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .mrow.assistant .mbody {
+            align-items: flex-end;
+        }
+
+        .mrole {
+            font-size: 10px;
+            color: var(--dim);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .mbubl {
+            padding: 9px 13px;
+            border-radius: 13px;
+            font-size: 13px;
+            line-height: 1.65;
+            word-break: break-word;
+        }
+
+        .mrow.user .mbubl {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-top-left-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+        }
+
+        .mrow.assistant .mbubl {
+            background: var(--blue);
+            color: #fff;
+            border-top-right-radius: 3px;
+        }
+
+        .mtime {
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 10px;
+            padding: 24px;
+        }
+
+        .ei {
+            font-size: 36px;
+            opacity: .45;
+        }
+
+        .et {
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .spin {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fi {
+            from {
+                opacity: 0;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .fi {
+            animation: fi .18s ease;
+        }
+
+        /* 입시웄근 버튼 */
+        .btn-checkin {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 700;
+            border: 2px solid;
+            transition: all .2s;
+        }
+
+        .btn-checkin.offline {
+            border-color: var(--green);
+            color: var(--green);
+            background: #f0fdf4;
+        }
+
+        .btn-checkin.offline:hover {
+            background: #dcfce7;
+        }
+
+        .btn-checkin.online {
+            border-color: var(--err);
+            color: var(--err);
+            background: #fef2f2;
+        }
+
+        .btn-checkin.online:hover {
+            background: #fee2e2;
+        }
+
+        .status-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+        }
+
+        .status-dot .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online .dot {
+            background: var(--green);
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, .2);
+        }
+
+        .status-dot.offline .dot {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">💬</div>
+        <div>
+            <div style="font-size:16px;font-weight:700">CareDesk</div>
+            <div style="font-size:12px;color:var(--muted)">상담원 대시보드</div>
+        </div>
+        <div class="hr">
+            <div class="status-dot offline" id="statusDot">
+                <span class="dot"></span><span id="statusTxt">미출근</span>
+            </div>
+            <button class="btn-checkin offline" id="checkinBtn" onclick="toggleCheckin()">출근하기</button>
+            <div class="ubadge">👤 <span id="cname">상담원</span></div>
+            <button class="btnlo" onclick="logout()">로그아웃</button>
+        </div>
+    </header>
+    <div class="stats">
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="sn" id="stPhone">-</div>
+            <div class="sl">담당 전화번호</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="sn" id="stSess">-</div>
+            <div class="sl">총 세션 수</div>
+        </div>
+    </div>
+    <div class="main">
+        <!-- 1: 전화번호 목록 -->
+        <div class="pcol">
+            <div class="phdr">
+                <div class="ptitle">전화번호 목록</div>
+                <div class="psub" id="phoneSub">불러오는 중...</div>
+            </div>
+            <div class="srchwrap"><input class="srchinp" id="srchinp" type="text" placeholder="전화번호 검색..."
+                    oninput="filterP()" /></div>
+            <div class="scrollable" id="phoneList">
+                <div class="loading">
+                    <div class="spin"></div>불러오는 중
+                </div>
+            </div>
+        </div>
+        <!-- 2: 세션 목록 -->
+        <div class="pcol">
+            <div class="phdr">
+                <div class="ptitle">통화 세션</div>
+                <div class="psub" id="sessSub">전화번호를 선택하세요</div>
+            </div>
+            <div class="scrollable" id="sessList">
+                <div class="empty">
+                    <div class="ei">📋</div>
+                    <div class="et">전화번호를 선택하세요</div>
+                </div>
+            </div>
+        </div>
+        <!-- 3: 대화 내역 -->
+        <div class="pcol">
+            <div class="chdr">
+                <div>
+                    <div class="cphone" id="chatPhone"
+                        style="font-size:13px;font-weight:600;color:var(--muted);display:block">세션을 선택하세요</div>
+                    <div class="csid" id="chatSid"></div>
+                </div>
+                <span id="chatBadge" class="cmb" style="display:none"></span>
+            </div>
+            <div class="chatarea" id="chatArea">
+                <div class="empty">
+                    <div class="ei">💬</div>
+                    <div class="et">세션을 선택하면<br />AI 상담 대화 내역이 표시됩니다</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let allPhones = [], selPhKey = null;
+
+        (async () => {
+            const me = await fetch('/api/auth/me').then(r => r.json());
+            if (!me.success || me.data.role !== 'counselor') { location.href = '/'; return; }
+            document.getElementById('cname').textContent = me.data.name;
+            await loadAttendance();
+            loadPhones();
+        })();
+
+        // 입퇴근 상태 로드
+        async function loadAttendance() {
+            try {
+                const r = await fetch('/api/counselor/attendance-status').then(x => x.json());
+                if (r.success) setAttendanceUI(r.data.attendance_status, r.data.checkin_at);
+            } catch { }
+        }
+
+        function setAttendanceUI(status, checkinAt) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusTxt');
+            const btn = document.getElementById('checkinBtn');
+            const isOnline = status === 'online';
+            dot.className = `status-dot ${isOnline ? 'online' : 'offline'}`;
+            txt.textContent = isOnline
+                ? ('출근 중' + (checkinAt ? ' · ' + fmtTime(checkinAt) + '부터' : ''))
+                : '미출근';
+            btn.className = `btn-checkin ${isOnline ? 'online' : 'offline'}`;
+            btn.textContent = isOnline ? '퇴근하기' : '출근하기';
+        }
+
+        async function toggleCheckin() {
+            const btn = document.getElementById('checkinBtn');
+            const isOnline = btn.classList.contains('online');
+            btn.disabled = true;
+            try {
+                const r = await fetch(isOnline ? '/api/counselor/checkout' : '/api/counselor/checkin',
+                    { method: 'POST' }).then(x => x.json());
+                if (r.success) {
+                    const checkinAt = r.status === 'online' ? r.checkin_at : null;
+                    setAttendanceUI(r.status, checkinAt);
+                }
+            } catch { }
+            btn.disabled = false;
+        }
+
+        function fmtTime(dt) {
+            if (!dt) return '';
+            return new Date(dt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function loadPhones() {
+            const data = await api('/api/counselor/phones');
+            allPhones = data || [];
+            const total = allPhones.reduce((a, p) => a + (p.session_count || 0), 0);
+            document.getElementById('stPhone').textContent = allPhones.length;
+            document.getElementById('stSess').textContent = total;
+            document.getElementById('phoneSub').textContent = `총 ${allPhones.length}개 전화번호`;
+            renderPhones(allPhones);
+        }
+        function filterP() {
+            const q = document.getElementById('srchinp').value;
+            renderPhones(allPhones.filter(p => (p.phone || '').includes(q)));
+        }
+        function renderPhones(list) {
+            const el = document.getElementById('phoneList');
+            if (!list.length) { el.innerHTML = mkEmpty('📋', '담당 상담이 없습니다'); return; }
+            el.innerHTML = list.map(p => `
+    <div class="row fi ${p.phone_key === selPhKey ? 'active' : ''}" onclick="pickPhone('${esc(p.phone_key)}','${esc(p.phone || '')}')">
+      <div class="rname">${p.phone || '<span style="color:var(--dim);font-weight:400;font-size:12px">전화번호 미등록</span>'}</div>
+      <div class="rsub">통화 세션 ${p.session_count}건</div>
+    </div>
+  `).join('');
+        }
+        async function pickPhone(key, phone) {
+            selPhKey = key;
+            renderPhones(allPhones.filter(p => (p.phone || '').includes(document.getElementById('srchinp').value)));
+            document.getElementById('sessSub').textContent = phone || key;
+            const sEl = document.getElementById('sessList');
+            sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+            resetChat();
+            const data = await api(`/api/counselor/phones/${encodeURIComponent(key)}/sessions`);
+            if (!data || !data.length) { sEl.innerHTML = mkEmpty('📋', '세션 없음'); return; }
+            sEl.innerHTML = data.map(s => `
+    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}',this)">
+      <div class="rname" style="font-size:13px">세션 #${s.id} <span class="mb">${s.msg_count}개</span></div>
+      <div class="smeta">
+        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
+      </div>
+    </div>
+  `).join('');
+        }
+        async function pickSess(id, sid, phone, el) {
+            document.querySelectorAll('#sessList .row').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            const phpEl = document.getElementById('chatPhone');
+            phpEl.textContent = phone || `세션 #${id}`;
+            phpEl.style.cssText = phone ? 'font-size:15px;font-weight:700;' : 'font-size:13px;font-weight:600;color:var(--muted)';
+            document.getElementById('chatSid').textContent = sid ? `Session: ${sid}` : `#${id}`;
+            document.getElementById('chatBadge').style.display = 'none';
+            const chat = document.getElementById('chatArea');
+            chat.innerHTML = `<div class="loading"><div class="spin"></div>대화 내역 불러오는 중</div>`;
+            const data = await api(`/api/sessions/${id}/messages`);
+            if (!data || !data.length) { chat.innerHTML = mkEmpty('💬', '대화 내역이 없습니다'); return; }
+            const badge = document.getElementById('chatBadge');
+            badge.textContent = `${data.length}개 메시지`; badge.style.display = 'inline-block';
+            chat.innerHTML = data.map(m => `
+    <div class="mrow ${m.role} fi">
+      <div class="mavt ${m.role}">${m.role === 'user' ? '👤' : '🤖'}</div>
+      <div class="mbody">
+        <div class="mrole">${m.role === 'user' ? '사용자' : 'AI 상담사'}</div>
+        <div class="mbubl">${esc(m.content)}</div>
+        <div class="mtime">${fmt(m.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+            chat.scrollTop = chat.scrollHeight;
+        }
+        function resetChat() {
+            const p = document.getElementById('chatPhone');
+            p.textContent = '세션을 선택하세요'; p.style.cssText = 'font-size:13px;font-weight:600;color:var(--muted)';
+            document.getElementById('chatSid').textContent = '';
+            document.getElementById('chatBadge').style.display = 'none';
+            document.getElementById('chatArea').innerHTML = mkEmpty('💬', '세션을 선택하세요');
+        }
+        async function logout() { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/'; }
+        async function api(u) { try { const r = await fetch(u); const d = await r.json(); return d.success ? d.data : null; } catch { return null; } }
+        function esc(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function fmt(dt) { if (!dt) return '-'; return new Date(dt).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+        function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
+        function mkEmpty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
+    </script>
+</body>
+
+</html>
