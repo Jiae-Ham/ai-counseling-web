@@ -19,8 +19,14 @@ const poolOpts = {
   password: process.env.DB_PASSWORD || 'counseling_pass',
   waitForConnections: true,
   connectionLimit: 10,
+  timezone: '+09:00', // KST
 };
 const pool = mysql.createPool(poolOpts);
+
+// 모든 커넥션에 KST 타임존 강제 적용
+pool.on('connection', (conn) => {
+  conn.query("SET time_zone = '+09:00'");
+});
 
 // ── Session Store (MySQL) ──
 const sessionStore = new MySQLStore({
@@ -190,7 +196,7 @@ app.get('/api/admin/sessions/unassigned', requireAdmin, async (req, res) => {
        JOIN users u ON cs.user_id = u.id
        WHERE cs.counselor_id IS NULL
          AND (SELECT COUNT(*) FROM conversation_message WHERE session_id = cs.id) > 0
-       ORDER BY cs.start_at ASC`
+       ORDER BY cs.start_at DESC`
     );
     res.json({ success: true, data: rows });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }

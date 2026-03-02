@@ -697,10 +697,9 @@
             if (!data || !data.length) { sEl.innerHTML = mkEmpty('📋', '세션 없음'); return; }
             sEl.innerHTML = data.map(s => `
     <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}',this)">
-      <div class="rname" style="font-size:13px">세션 #${s.id} <span class="mb">${s.msg_count}개</span></div>
+      <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
       <div class="smeta">
         <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
-        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
       </div>
     </div>
   `).join('');
@@ -742,6 +741,7 @@
         async function api(u) { try { const r = await fetch(u); const d = await r.json(); return d.success ? d.data : null; } catch { return null; } }
         function esc(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
         function fmt(dt) { if (!dt) return '-'; return new Date(dt).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+        function fmtId(dt, phone) { if (!dt) return phone || '번호없음'; const d = new Date(dt); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}${m}${day}_${phone || '번호없음'}`; }
         function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
         function mkEmpty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
     </script>

@@ -1,0 +1,13 @@
+# 환경변수 (DB 비밀번호, 시크릿 키 등 절대 커밋 금지)
+.env
+
+# Node.js 의존성
+node_modules/
+
+# 로그
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
