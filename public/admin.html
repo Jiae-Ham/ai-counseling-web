@@ -991,7 +991,10 @@
                             <div class="ptitle">미배분 상담</div>
                             <div id="ucnt" class="psub">불러오는 중...</div>
                         </div>
-                        <button class="bxs btn-off" onclick="loadUnassigned()">새로고침</button>
+                        <div style="display:flex;gap:6px">
+                            <button class="bxs btn-off" id="sortBtn" onclick="toggleSort()">↓ 최신순</button>
+                            <button class="bxs btn-off" onclick="loadUnassigned()">새로고침</button>
+                        </div>
                     </div>
                     <div id="aflash"></div>
                     <div class="scrollable" id="unList">
@@ -1091,6 +1094,7 @@
     </div>
     <script>
         let selCoId = null, selUn = new Set(), allPhones = [], selPhKey = null;
+        let unData = [], unSort = 'desc'; // 미배분 세션 데이터 및 정렬 상태
 
         (async () => {
             const me = await fetch('/api/auth/me').then(r => r.json());
@@ -1147,16 +1151,37 @@
             selUn.clear(); updBtn();
             const data = await api('/api/admin/sessions/unassigned');
             document.getElementById('ucnt').textContent = data ? `${data.length}건 (대화 있음)` : '실패';
-            if (!data || !data.length) { el.innerHTML = empty('✅', '미배분 상담이 없습니다'); return; }
-            el.innerHTML = data.map(s => `
+            unData = data || [];
+            renderUnassigned();
+        }
+        function toggleSort() {
+            unSort = unSort === 'desc' ? 'asc' : 'desc';
+            const btn = document.getElementById('sortBtn');
+            btn.textContent = unSort === 'desc' ? '↓ 최신순' : '↑ 오래된순';
+            renderUnassigned();
+        }
+        function renderUnassigned() {
+            const el = document.getElementById('unList');
+            if (!unData.length) { el.innerHTML = empty('✅', '미배분 상담이 없습니다'); return; }
+            const sorted = [...unData].sort((a, b) => {
+                const ta = new Date(a.start_at), tb = new Date(b.start_at);
+                return unSort === 'desc' ? tb - ta : ta - tb;
+            });
+            el.innerHTML = sorted.map(s => `
     <div class="cbrow fi" id="sr-${s.id}" onclick="togSel(${s.id},event)">
       <input class="cb" type="checkbox" id="cb-${s.id}" onclick="event.stopPropagation();togSel(${s.id},event,true)" />
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
+        <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)}</div>
         <div style="font-size:11px;color:var(--dim);margin-top:2px">${esc(s.name)} &middot; ${fmt(s.start_at)}</div>
       </div>
     </div>
   `).join('');
+            // 코드는 새로 렌더링됨 - 이전 체크박스 상태 복원
+            selUn.forEach(id => {
+                const cb = document.getElementById('cb-' + id);
+                const row = document.getElementById('sr-' + id);
+                if (cb) { cb.checked = true; row.classList.add('sel'); }
+            });
         }
         function togSel(id, evt, fromCb) {
             const row = document.getElementById('sr-' + id), cb = document.getElementById('cb-' + id);
@@ -1199,7 +1224,7 @@
             el.innerHTML = data.map(s => `
     <div class="asrow fi">
       <div>
-        <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)} <span class="mb" style="margin-left:4px">${s.msg_count}</span></div>
+        <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)}</div>
         <div style="font-size:11px;color:var(--dim)">${esc(s.name)} &middot; ${fmt(s.start_at)}</div>
       </div>
       <button class="btnua" onclick="doUnassign(${s.id})">해제</button>
@@ -1269,7 +1294,7 @@
             if (!data || !data.length) { sEl.innerHTML = empty('📋', '대화 있는 세션 없음'); return; }
             sEl.innerHTML = data.map(s => `
     <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
-      <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
+      <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)}</div>
       <div class="smeta">
         <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
         <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
