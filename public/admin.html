@@ -1153,7 +1153,7 @@
       <input class="cb" type="checkbox" id="cb-${s.id}" onclick="event.stopPropagation();togSel(${s.id},event,true)" />
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
-        <div style="font-size:11px;color:var(--dim);margin-top:2px">${esc(s.name)}</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">${esc(s.name)} &middot; ${fmt(s.start_at)}</div>
       </div>
     </div>
   `).join('');
@@ -1200,7 +1200,7 @@
     <div class="asrow fi">
       <div>
         <div style="font-size:13px;font-weight:600">${fmtId(s.start_at, s.phone)} <span class="mb" style="margin-left:4px">${s.msg_count}</span></div>
-        <div style="font-size:11px;color:var(--dim)">${esc(s.name)}</div>
+        <div style="font-size:11px;color:var(--dim)">${esc(s.name)} &middot; ${fmt(s.start_at)}</div>
       </div>
       <button class="btnua" onclick="doUnassign(${s.id})">해제</button>
     </div>
@@ -1272,6 +1272,7 @@
       <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
       <div class="smeta">
         <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
         ${s.counselor_name ? `<span style="font-size:11px;color:var(--purple);font-weight:600">👤${esc(s.counselor_name)}</span>` : ''}
       </div>
     </div>

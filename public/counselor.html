@@ -700,6 +700,7 @@
       <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)} <span class="mb">${s.msg_count}개</span></div>
       <div class="smeta">
         <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
       </div>
     </div>
   `).join('');
