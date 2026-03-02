@@ -741,8 +741,9 @@
         async function logout() { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/'; }
         async function api(u) { try { const r = await fetch(u); const d = await r.json(); return d.success ? d.data : null; } catch { return null; } }
         function esc(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-        function fmt(dt) { if (!dt) return '-'; return new Date(dt).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
-        function fmtId(dt, phone) { if (!dt) return phone || '번호없음'; const d = new Date(dt); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}${m}${day}_${phone || '번호없음'}`; }
+        function parseUtc(dt) { if (!dt) return null; if (dt instanceof Date) return dt; const s = String(dt).replace(' ', 'T'); return new Date(/Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : s + 'Z'); }
+        function fmt(dt) { if (!dt) return '-'; return parseUtc(dt).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+        function fmtId(dt, phone) { if (!dt) return phone || '번호없음'; const d = parseUtc(dt); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}${m}${day}_${phone || '번호없음'}`; }
         function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
         function mkEmpty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
     </script>
