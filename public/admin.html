@@ -1486,17 +1486,31 @@
 
         // ── TAB 3 ──────────────────────────────────────────
         async function loadPhones() {
-            const df = document.getElementById('v-dateFrom') && document.getElementById('v-dateFrom').value;
-            const dt = document.getElementById('v-dateTo') && document.getElementById('v-dateTo').value;
-            let url = '/api/admin/phones';
+            const df = (document.getElementById('v-dateFrom') || {}).value || '';
+            const dt = (document.getElementById('v-dateTo') || {}).value || '';
             const qs = [];
             if (df) qs.push('dateFrom=' + encodeURIComponent(df));
             if (dt) qs.push('dateTo=' + encodeURIComponent(dt));
-            if (qs.length) url += '?' + qs.join('&');
+            const url = '/api/admin/phones' + (qs.length ? '?' + qs.join('&') : '');
             const data = await api(url);
             allPhones = data || [];
             document.getElementById('v-phoneCnt').textContent = `총 ${allPhones.length}개`;
             filterPhones();
+            // 날짜 변경 시 현재 선택된 전화번호의 세션도 재조회
+            if (selPhKey) {
+                const sEl = document.getElementById('v-sessList');
+                sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
+                const sessQs = [];
+                if (df) sessQs.push('dateFrom=' + encodeURIComponent(df));
+                if (dt) sessQs.push('dateTo=' + encodeURIComponent(dt));
+                const sessUrl = `/api/admin/phones/${encodeURIComponent(selPhKey)}/sessions` + (sessQs.length ? '?' + sessQs.join('&') : '');
+                const sessData = await api(sessUrl);
+                allSessions = sessData || [];
+                selectedSessions.clear();
+                document.getElementById('bulkDelBtn').style.display = 'none';
+                if (!allSessions.length) { sEl.innerHTML = empty('📋', '해당 날짜 세션 없음'); return; }
+                renderSessions();
+            }
         }
         function setPhoneFilter(f) {
             phoneFilter = f;
@@ -1565,8 +1579,8 @@
             document.getElementById('v-chatPhone').style.color = 'var(--muted)';
             document.getElementById('v-chatSid').textContent = '';
             document.getElementById('v-msgBadge').style.display = 'none';
-            const _df = document.getElementById('v-dateFrom') && document.getElementById('v-dateFrom').value;
-            const _dt = document.getElementById('v-dateTo') && document.getElementById('v-dateTo').value;
+            const _df = (document.getElementById('v-dateFrom') || {}).value || '';
+            const _dt = (document.getElementById('v-dateTo') || {}).value || '';
             const _qs = [_df ? 'dateFrom=' + encodeURIComponent(_df) : '', _dt ? 'dateTo=' + encodeURIComponent(_dt) : ''].filter(Boolean).join('&');
             const data = await api(`/api/admin/phones/${encodeURIComponent(key)}/sessions${_qs ? '?' + _qs : ''}`);
             allSessions = data || [];
