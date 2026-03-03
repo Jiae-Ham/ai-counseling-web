@@ -1150,8 +1150,8 @@
             el.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
             selUn.clear(); updBtn();
             const data = await api('/api/admin/sessions/unassigned');
-            document.getElementById('ucnt').textContent = data ? `${data.length}건 (대화 있음)` : '실패';
-            unData = data || [];
+            unData = (data || []).filter(s => s.phone);
+            document.getElementById('ucnt').textContent = data ? `${unData.length}건 (대화 있음)` : '실패';
             renderUnassigned();
         }
         function toggleSort() {
@@ -1261,7 +1261,7 @@
         // ── TAB 3 ──────────────────────────────────────────
         async function loadPhones() {
             const data = await api('/api/admin/phones');
-            allPhones = data || [];
+            allPhones = (data || []).filter(p => p.phone);
             document.getElementById('v-phoneCnt').textContent = `총 ${allPhones.length}개`;
             renderPhones(allPhones);
         }
