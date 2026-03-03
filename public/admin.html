@@ -1496,19 +1496,10 @@
             allPhones = data || [];
             document.getElementById('v-phoneCnt').textContent = `총 ${allPhones.length}개`;
             filterPhones();
-            // 날짜 변경 시 현재 선택된 전화번호의 세션도 재조회
-            if (selPhKey) {
-                const sEl = document.getElementById('v-sessList');
-                sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
-                const sessQs = [];
-                if (df) sessQs.push('dateFrom=' + encodeURIComponent(df));
-                if (dt) sessQs.push('dateTo=' + encodeURIComponent(dt));
-                const sessUrl = `/api/admin/phones/${encodeURIComponent(selPhKey)}/sessions` + (sessQs.length ? '?' + sessQs.join('&') : '');
-                const sessData = await api(sessUrl);
-                allSessions = sessData || [];
+            // 날짜 변경 시 현재 선택된 전화번호의 세션 목록 즉시 재필터링
+            if (selPhKey && allSessions.length) {
                 selectedSessions.clear();
                 document.getElementById('bulkDelBtn').style.display = 'none';
-                if (!allSessions.length) { sEl.innerHTML = empty('📋', '해당 날짜 세션 없음'); return; }
                 renderSessions();
             }
         }
@@ -1547,11 +1538,27 @@
             });
             renderSessions();
         }
+        function sessDateStr(dt) {
+            if (!dt) return '';
+            const s = String(dt);
+            // ISO 형식(T 포함 또는 Z 끝)이면 Date 객체로 파싱해 로컬 날짜 추출
+            if (s.includes('T') || s.endsWith('Z')) {
+                const d = new Date(s);
+                if (isNaN(d)) return '';
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+            // MySQL 'YYYY-MM-DD HH:MM:SS' 형식이면 앞 10자리만 반환
+            return s.substring(0, 10);
+        }
         function renderSessions() {
             const sEl = document.getElementById('v-sessList');
             let list = allSessions;
             if (sessFilter !== 'all') list = list.filter(s => (s.status || '').toUpperCase().includes(sessFilter));
             if (reviewFilter !== 'all') list = list.filter(s => (s.review_status || '미확인') === reviewFilter);
+            const df = (document.getElementById('v-dateFrom') || {}).value || '';
+            const dt = (document.getElementById('v-dateTo') || {}).value || '';
+            if (df) list = list.filter(s => sessDateStr(s.start_at) >= df);
+            if (dt) list = list.filter(s => sessDateStr(s.start_at) <= dt);
             if (!list.length) { sEl.innerHTML = empty('📋', '해당 세션 없음'); return; }
             sEl.innerHTML = list.map(s => `
     <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
