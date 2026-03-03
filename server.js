@@ -337,6 +337,7 @@ app.get('/api/admin/phones', requireAdmin, async (req, res) => {
 app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) => {
   try {
     const key = decodeURIComponent(req.params.phoneKey);
+    const { dateFrom, dateTo } = req.query;
     let whereClause, params;
     if (key.startsWith('uid-')) {
       whereClause = 'cs.user_id = ?';
@@ -345,6 +346,8 @@ app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) =
       whereClause = 'u.phone = ?';
       params = [key];
     }
+    if (dateFrom) { whereClause += ' AND cs.start_at >= ?'; params.push(dateFrom + ' 00:00:00'); }
+    if (dateTo)   { whereClause += ' AND cs.start_at <= ?'; params.push(dateTo   + ' 23:59:59'); }
     const [rows] = await pool.query(
       `SELECT cs.id, cs.session_id, cs.status, cs.review_status, cs.start_at, cs.end_at,
               u.name, u.phone,

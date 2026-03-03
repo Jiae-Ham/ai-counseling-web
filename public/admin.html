@@ -1565,7 +1565,10 @@
             document.getElementById('v-chatPhone').style.color = 'var(--muted)';
             document.getElementById('v-chatSid').textContent = '';
             document.getElementById('v-msgBadge').style.display = 'none';
-            const data = await api(`/api/admin/phones/${encodeURIComponent(key)}/sessions`);
+            const _df = document.getElementById('v-dateFrom') && document.getElementById('v-dateFrom').value;
+            const _dt = document.getElementById('v-dateTo') && document.getElementById('v-dateTo').value;
+            const _qs = [_df ? 'dateFrom=' + encodeURIComponent(_df) : '', _dt ? 'dateTo=' + encodeURIComponent(_dt) : ''].filter(Boolean).join('&');
+            const data = await api(`/api/admin/phones/${encodeURIComponent(key)}/sessions${_qs ? '?' + _qs : ''}`);
             allSessions = data || [];
             selectedSessions.clear();
             document.getElementById('bulkDelBtn').style.display = 'none';
