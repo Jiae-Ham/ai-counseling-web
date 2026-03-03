@@ -191,7 +191,8 @@
             z-index: 10;
         }
 
-        .resize-handle:hover, .resize-handle.dragging {
+        .resize-handle:hover,
+        .resize-handle.dragging {
             background: var(--blue);
         }
 
@@ -324,9 +325,23 @@
             outline: none;
         }
 
-        .rstatus.rs-가망 { border-color: #6ee7b7; color: #065f46; background: #ecfdf5; }
-        .rstatus.rs-비가망 { border-color: #fca5a5; color: #b91c1c; background: #fef2f2; }
-        .rstatus.rs-미확인 { border-color: var(--border2); color: var(--muted); background: #f9fafb; }
+        .rstatus.rs-가망 {
+            border-color: #6ee7b7;
+            color: #065f46;
+            background: #ecfdf5;
+        }
+
+        .rstatus.rs-비가망 {
+            border-color: #fca5a5;
+            color: #b91c1c;
+            background: #fef2f2;
+        }
+
+        .rstatus.rs-미확인 {
+            border-color: var(--border2);
+            color: var(--muted);
+            background: #f9fafb;
+        }
 
         .date-filter-bar {
             display: flex;
@@ -360,7 +375,9 @@
             flex-shrink: 0;
         }
 
-        .btn-del:hover { opacity: 1; }
+        .btn-del:hover {
+            opacity: 1;
+        }
 
         .sess-chk {
             width: 15px;
@@ -550,31 +567,39 @@
         /* ── 모달 ── */
         .modal-overlay {
             display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,.45);
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
-        .modal-overlay.show { display: flex; }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
         .modal-box {
             background: #fff;
             border-radius: 12px;
             padding: 28px 28px 22px;
             width: 320px;
-            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .18);
         }
+
         .modal-title {
             font-size: 15px;
             font-weight: 700;
             color: var(--text);
             margin-bottom: 6px;
         }
+
         .modal-sub {
             font-size: 12px;
             color: var(--muted);
             margin-bottom: 16px;
         }
+
         .modal-inp {
             width: 100%;
             box-sizing: border-box;
@@ -586,12 +611,17 @@
             outline: none;
             margin-bottom: 16px;
         }
-        .modal-inp:focus { border-color: var(--blue); }
+
+        .modal-inp:focus {
+            border-color: var(--blue);
+        }
+
         .modal-btns {
             display: flex;
             gap: 8px;
             justify-content: flex-end;
         }
+
         .modal-btns button {
             padding: 7px 18px;
             border-radius: 7px;
@@ -603,6 +633,7 @@
             background: #fff;
             color: var(--text);
         }
+
         .modal-btns .btn-confirm {
             background: var(--blue);
             border-color: var(--blue);
@@ -1257,7 +1288,9 @@
                             <div class="ptitle">통화 세션</div>
                             <div class="psub" id="v-sessSub">전화번호를 선택하세요</div>
                         </div>
-                        <button class="bxs btn-off" id="bulkDelBtn" style="display:none;color:#ef4444;border-color:#fca5a5" onclick="bulkDeleteSessions()">선택 삭제 (<span id="selCnt">0</span>)</button>
+                        <button class="bxs btn-off" id="bulkDelBtn"
+                            style="display:none;color:#ef4444;border-color:#fca5a5" onclick="bulkDeleteSessions()">선택 삭제
+                            (<span id="selCnt">0</span>)</button>
                     </div>
                     <div class="filter-bar">
                         <button class="fbtn active" id="rf-all" onclick="setReviewFilter('all')">전체</button>
@@ -1536,6 +1569,9 @@
                 const el = document.getElementById('rf-' + k);
                 if (el) el.classList.toggle('active', k === f);
             });
+            // 필터 변경 시 선택 초기화
+            selectedSessions.clear();
+            document.getElementById('bulkDelBtn').style.display = 'none';
             renderSessions();
         }
         function sessDateStr(dt) {
@@ -1545,7 +1581,7 @@
             if (s.includes('T') || s.endsWith('Z')) {
                 const d = new Date(s);
                 if (isNaN(d)) return '';
-                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             }
             // MySQL 'YYYY-MM-DD HH:MM:SS' 형식이면 앞 10자리만 반환
             return s.substring(0, 10);
@@ -1564,7 +1600,7 @@
     <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
         <div class="rname" style="font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fmtId(s.start_at, s.phone)}</div>
-        <span class="rstatus rs-${esc(s.review_status||'미확인')}">${esc(s.review_status||'미확인')}</span>
+        <span class="rstatus rs-${esc(s.review_status || '미확인')}">${esc(s.review_status || '미확인')}</span>
         <input type="checkbox" class="sess-chk" data-id="${s.id}" onclick="event.stopPropagation();toggleSessChk(${s.id},this)" />
       </div>
       <div class="smeta">
@@ -1574,6 +1610,11 @@
       </div>
     </div>
   `).join('');
+            // 체크박스 상태 복원
+            selectedSessions.forEach(id => {
+                const cb = sEl.querySelector(`input[data-id="${id}"]`);
+                if (cb) cb.checked = true;
+            });
         }
         async function pickPhone(key, phone) {
             selPhKey = key;
@@ -1650,13 +1691,51 @@
             const cnt = selectedSessions.size;
             if (!cnt) return;
             if (!confirm(`선택한 ${cnt}개 세션을 삭제하시겠습니까?\n대화 내역과 메모가 모두 삭제됩니다.`)) return;
+            const btn = document.getElementById('bulkDelBtn');
+            btn.textContent = '삭제 중...';
+            btn.disabled = true;
+            let successCnt = 0, failCnt = 0;
             for (const id of selectedSessions) {
-                await fetch(`/api/admin/sessions/${id}`, { method: 'DELETE' }).catch(() => null);
+                try {
+                    const r = await fetch(`/api/admin/sessions/${id}`, { method: 'DELETE' });
+                    const d = await r.json();
+                    if (d.success) successCnt++; else failCnt++;
+                } catch { failCnt++; }
             }
-            allSessions = allSessions.filter(s => !selectedSessions.has(s.id));
             selectedSessions.clear();
-            document.getElementById('bulkDelBtn').style.display = 'none';
-            renderSessions();
+            btn.style.display = 'none';
+            btn.innerHTML = '선택 삭제 (<span id="selCnt">0</span>)';
+            btn.disabled = false;
+            // 오른쪽 chat 패널 초기화
+            document.getElementById('v-chat').innerHTML = empty('💬', '세션을 선택하세요');
+            document.getElementById('v-chatPhone').textContent = '세션을 선택하세요';
+            document.getElementById('v-chatPhone').style.color = 'var(--muted)';
+            document.getElementById('v-chatSid').textContent = '';
+            document.getElementById('v-msgBadge').style.display = 'none';
+            // 완료 메시지
+            const sub = document.getElementById('v-sessSub');
+            const prevTxt = sub.textContent;
+            if (failCnt > 0) {
+                sub.style.color = 'var(--err)';
+                sub.textContent = `✗ ${failCnt}건 삭제 실패 (${successCnt}건 성공)`;
+            } else {
+                sub.style.color = 'var(--ok)';
+                sub.textContent = `✓ ${successCnt}건 삭제 완료`;
+            }
+            setTimeout(() => { sub.textContent = prevTxt; sub.style.color = ''; }, 3000);
+            // 서버에서 실제 데이터 재로딩 (DB 반영 확인)
+            if (selPhKey) {
+                const _df = (document.getElementById('v-dateFrom') || {}).value || '';
+                const _dt = (document.getElementById('v-dateTo') || {}).value || '';
+                const _qs = [_df ? 'dateFrom=' + encodeURIComponent(_df) : '', _dt ? 'dateTo=' + encodeURIComponent(_dt) : ''].filter(Boolean).join('&');
+                const freshData = await api(`/api/admin/phones/${encodeURIComponent(selPhKey)}/sessions${_qs ? '?' + _qs : ''}`);
+                allSessions = freshData || [];
+                renderSessions();
+            }
+            // 전화번호 목록도 갱신 (세션이 없어진 전화번호 숨기기)
+            await loadPhones();
+            // TAB1·TAB2 상담원 배분 카운트 갱신
+            loadStaff(); loadCPick(); loadUnassigned();
         }
         async function updateReviewStatus(sessionId, val, sel) {
             sel.className = `rstatus rs-${val}`;
