@@ -41,7 +41,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
-  cookie: { maxAge: 86400000 }, // 24h
+  cookie: {}, // 브라우저 닫으면 세션 쿠키 삭제 (로그아웃)
 }));
 
 // ── 정적 파일 ──
@@ -167,6 +167,17 @@ app.post('/api/admin/staff', requireAdmin, async (req, res) => {
 app.patch('/api/admin/staff/:id/toggle', requireAdmin, async (req, res) => {
   try {
     await pool.query('UPDATE staff SET is_active = NOT is_active WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// 상담원 비밀번호 강제 변경 (관리자 전용)
+app.patch('/api/admin/staff/:id/password', requireAdmin, async (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 4) return res.status(400).json({ success: false, message: '새 비밀번호를 4자 이상 입력하세요.' });
+  try {
+    const hash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE staff SET password = ? WHERE id = ?', [hash, req.params.id]);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -299,16 +310,24 @@ app.get('/api/admin/attendance', requireAdmin, async (req, res) => {
 // 전화번호별 그룹 목록 (대화 있는 세션만)
 app.get('/api/admin/phones', requireAdmin, async (req, res) => {
   try {
+    const { dateFrom, dateTo } = req.query;
+    let dateWhere = '';
+    const params = [];
+    if (dateFrom) { dateWhere += ' AND cs.start_at >= ?'; params.push(dateFrom + ' 00:00:00'); }
+    if (dateTo)   { dateWhere += ' AND cs.start_at <= ?'; params.push(dateTo   + ' 23:59:59'); }
     const [rows] = await pool.query(
       `SELECT
          COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))) AS phone_key,
          u.phone,
-         COUNT(DISTINCT cs.id) AS session_count
+         COUNT(DISTINCT cs.id) AS session_count,
+         MAX(cs.start_at) AS latest_at
        FROM users u
        JOIN call_session cs ON cs.user_id = u.id
        WHERE (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
+         ${dateWhere}
        GROUP BY COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))), u.phone
-       ORDER BY (u.phone IS NULL) ASC, u.phone ASC, phone_key ASC`
+       ORDER BY MAX(cs.start_at) DESC`,
+      params
     );
     res.json({ success: true, data: rows });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
@@ -327,7 +346,7 @@ app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) =
       params = [key];
     }
     const [rows] = await pool.query(
-      `SELECT cs.id, cs.session_id, cs.status, cs.start_at, cs.end_at,
+      `SELECT cs.id, cs.session_id, cs.status, cs.review_status, cs.start_at, cs.end_at,
               u.name, u.phone,
               s.name AS counselor_name,
               (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) AS msg_count
@@ -355,13 +374,14 @@ app.get('/api/counselor/phones', requireAuth, async (req, res) => {
       `SELECT
          COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))) AS phone_key,
          u.phone,
-         COUNT(DISTINCT cs.id) AS session_count
+         COUNT(DISTINCT cs.id) AS session_count,
+         MAX(cs.start_at) AS latest_at
        FROM users u
        JOIN call_session cs ON cs.user_id = u.id
        WHERE cs.counselor_id = ?
          AND (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
        GROUP BY COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))), u.phone
-       ORDER BY (u.phone IS NULL) ASC, u.phone ASC, phone_key ASC`,
+       ORDER BY MAX(cs.start_at) DESC`,
       [req.session.staff.id]
     );
     res.json({ success: true, data: rows });
@@ -382,7 +402,7 @@ app.get('/api/counselor/phones/:phoneKey/sessions', requireAuth, async (req, res
       params = [key, req.session.staff.id];
     }
     const [rows] = await pool.query(
-      `SELECT cs.id, cs.session_id, cs.status, cs.start_at, cs.end_at,
+      `SELECT cs.id, cs.session_id, cs.status, cs.review_status, cs.start_at, cs.end_at,
               u.name, u.phone,
               (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) AS msg_count
        FROM call_session cs
@@ -417,6 +437,59 @@ app.get('/api/sessions/:sessionId/messages', requireAuth, async (req, res) => {
       [sessionId]
     );
     res.json({ success: true, data: rows });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ═══════════════════════════════════════════
+// 세션 메모 (상담원 전용)
+// ═══════════════════════════════════════════
+
+// 메모 조회
+app.get('/api/sessions/:sessionId/memo', requireAuth, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT memo FROM session_memo WHERE session_id = ? AND staff_id = ?',
+      [req.params.sessionId, req.session.staff.id]
+    );
+    res.json({ success: true, memo: rows.length ? rows[0].memo : '' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// 메모 저장
+app.put('/api/sessions/:sessionId/memo', requireAuth, async (req, res) => {
+  const { memo } = req.body;
+  try {
+    await pool.query(
+      `INSERT INTO session_memo (session_id, staff_id, memo) VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE memo = ?, updated_at = NOW()`,
+      [req.params.sessionId, req.session.staff.id, memo, memo]
+    );
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// 검토 상태 변경
+app.patch('/api/sessions/:sessionId/review-status', requireAuth, async (req, res) => {
+  const { status } = req.body;
+  const allowed = ['미확인', '가망', '비가망'];
+  if (!allowed.includes(status)) return res.status(400).json({ success: false, message: '유효하지 않은 상태' });
+  try {
+    await pool.query(
+      'UPDATE call_session SET review_status = ? WHERE id = ?',
+      [status, req.params.sessionId]
+    );
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// 세션 삭제 (관리자 전용)
+app.delete('/api/admin/sessions/:sessionId', requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.sessionId;
+    await pool.query('DELETE FROM session_memo WHERE session_id = ?', [id]);
+    await pool.query('DELETE FROM conversation_message WHERE session_id = ?', [id]);
+    await pool.query('DELETE FROM call_session WHERE id = ?', [id]);
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 

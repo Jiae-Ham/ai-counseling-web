@@ -51,6 +51,33 @@ async function initDb(pool) {
             console.log('[DB] call_session.counselor_id 컬럼 추가됨');
         }
 
+        // ── call_session에 review_status 컬럼 추가 (없으면) ──
+        const [revCols] = await conn.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'call_session'
+        AND COLUMN_NAME = 'review_status'
+    `);
+        if (revCols.length === 0) {
+            await conn.query(`
+        ALTER TABLE call_session
+        ADD COLUMN review_status VARCHAR(20) NOT NULL DEFAULT '미확인'
+      `);
+            console.log('[DB] call_session.review_status 컬럼 추가됨');
+        }
+
+        // ── session_memo 테이블 생성 ──
+        await conn.query(`
+      CREATE TABLE IF NOT EXISTS session_memo (
+        id          INT AUTO_INCREMENT PRIMARY KEY,
+        session_id  INT NOT NULL,
+        staff_id    INT NOT NULL,
+        memo        TEXT,
+        updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_sess_staff (session_id, staff_id)
+      ) ENGINE=InnoDB
+    `);
+
         // ── 기본 admin 계정 생성 (없으면) ──
         const [admins] = await conn.query(`SELECT id FROM staff WHERE username = 'admin'`);
         if (admins.length === 0) {

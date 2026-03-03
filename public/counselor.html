@@ -123,8 +123,7 @@
 
         /* 3-panel layout */
         .main {
-            display: grid;
-            grid-template-columns: 240px 260px 1fr;
+            display: flex;
             flex: 1;
             overflow: hidden;
         }
@@ -135,12 +134,127 @@
             flex-direction: column;
             overflow: hidden;
             background: #fff;
+            flex-shrink: 0;
+            width: 240px;
+        }
+
+        .pcol:nth-child(3) {
+            width: 260px;
         }
 
         .pcol:last-child {
             border-right: none;
             background: var(--bg);
+            flex: 1;
+            flex-shrink: 1;
+            width: auto;
         }
+
+        .resize-handle {
+            width: 5px;
+            cursor: col-resize;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.1s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .resize-handle:hover, .resize-handle.dragging {
+            background: var(--blue);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 4px;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .fbtn {
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1.5px solid var(--border2);
+            background: #fff;
+            color: var(--dim);
+            font-weight: 600;
+            transition: all .15s;
+        }
+
+        .fbtn.active {
+            border-color: var(--blue);
+            color: var(--blue);
+            background: #eff6ff;
+        }
+
+        .resize-handle-v {
+            height: 5px;
+            cursor: row-resize;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.1s;
+            display: none;
+        }
+
+        .resize-handle-v:hover, .resize-handle-v.dragging {
+            background: var(--blue);
+        }
+
+        .memo-wrap {
+            padding: 8px 10px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex-shrink: 0;
+            overflow: hidden;
+            height: 140px;
+        }
+
+        .memo-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--dim);
+        }
+
+        .memo-area {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            color: var(--text);
+            background: #fafafa;
+            box-sizing: border-box;
+        }
+
+        .memo-area:focus {
+            border-color: var(--blue);
+            background: #fff;
+        }
+
+        .memo-save {
+            align-self: flex-end;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1.5px solid var(--blue);
+            color: var(--blue);
+            background: #eff6ff;
+        }
+
+        .memo-save:hover { background: #dbeafe; }
 
         .phdr {
             padding: 13px 16px;
@@ -251,6 +365,23 @@
             flex-wrap: wrap;
         }
 
+        .rstatus {
+            font-size: 11px;
+            font-family: inherit;
+            font-weight: 600;
+            border-radius: 5px;
+            border: 1.5px solid var(--border2);
+            background: #fff;
+            color: var(--text);
+            padding: 1px 4px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .rstatus.rs-가망 { border-color: #6ee7b7; color: #065f46; background: #ecfdf5; }
+        .rstatus.rs-비가망 { border-color: #fca5a5; color: #b91c1c; background: #fef2f2; }
+        .rstatus.rs-미확인 { border-color: var(--border2); color: var(--muted); background: #f9fafb; }
+
         .badge {
             font-size: 10px;
             padding: 2px 7px;
@@ -322,10 +453,10 @@
         .chatarea {
             flex: 1;
             overflow-y: auto;
-            padding: 18px 22px;
+            padding: 10px 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 2px;
         }
 
         .chatarea::-webkit-scrollbar {
@@ -339,7 +470,7 @@
 
         .mrow {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             max-width: 78%;
         }
 
@@ -390,10 +521,10 @@
         }
 
         .mbubl {
-            padding: 9px 13px;
-            border-radius: 13px;
-            font-size: 13px;
-            line-height: 1.65;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.55;
             word-break: break-word;
         }
 
@@ -580,11 +711,18 @@
                 </div>
             </div>
         </div>
+        <div class="resize-handle" id="rh1"></div>
         <!-- 2: 세션 목록 -->
         <div class="pcol">
             <div class="phdr">
                 <div class="ptitle">통화 세션</div>
                 <div class="psub" id="sessSub">전화번호를 선택하세요</div>
+            </div>
+            <div class="filter-bar">
+                <button class="fbtn active" id="rf-all" onclick="setReviewFilter('all')">전체</button>
+                <button class="fbtn" id="rf-가망" onclick="setReviewFilter('가망')">가망</button>
+                <button class="fbtn" id="rf-비가망" onclick="setReviewFilter('비가망')">비가망</button>
+                <button class="fbtn" id="rf-미확인" onclick="setReviewFilter('미확인')">미확인</button>
             </div>
             <div class="scrollable" id="sessList">
                 <div class="empty">
@@ -593,6 +731,7 @@
                 </div>
             </div>
         </div>
+        <div class="resize-handle" id="rh2"></div>
         <!-- 3: 대화 내역 -->
         <div class="pcol">
             <div class="chdr">
@@ -609,10 +748,16 @@
                     <div class="et">세션을 선택하면<br />AI 상담 대화 내역이 표시됩니다</div>
                 </div>
             </div>
+            <div class="resize-handle-v" id="vRh"></div>
+            <div class="memo-wrap" id="memoWrap" style="display:none">
+                <div class="memo-label">📝 메모</div>
+                <textarea class="memo-area" id="memoText" placeholder="이 세션에 대한 메모를 입력하세요..."></textarea>
+                <button class="memo-save" onclick="saveMemo()">저장</button>
+            </div>
         </div>
     </div>
     <script>
-        let allPhones = [], selPhKey = null;
+        let allPhones = [], selPhKey = null, curSessId = null, allSessions = [], sessFilter = 'all', reviewFilter = 'all';
 
         (async () => {
             const me = await fetch('/api/auth/me').then(r => r.json());
@@ -686,6 +831,42 @@
     </div>
   `).join('');
         }
+        function setSessFilter(f) {
+            sessFilter = f;
+            ['all', 'END', 'CONNECT'].forEach(k => { const el = document.getElementById('sf-' + (k === 'END' ? 'end' : k === 'CONNECT' ? 'conn' : 'all')); if (el) el.classList.toggle('active', k === f); });
+            renderSessions();
+        }
+        function setReviewFilter(f) {
+            reviewFilter = f;
+            ['all', '가망', '비가망', '미확인'].forEach(k => {
+                const el = document.getElementById('rf-' + k);
+                if (el) el.classList.toggle('active', k === f);
+            });
+            renderSessions();
+        }
+        function renderSessions() {
+            const sEl = document.getElementById('sessList');
+            let list = allSessions;
+            if (sessFilter !== 'all') list = list.filter(s => (s.status || '').toUpperCase().includes(sessFilter));
+            if (reviewFilter !== 'all') list = list.filter(s => (s.review_status || '미확인') === reviewFilter);
+            if (!list.length) { sEl.innerHTML = mkEmpty('📋', '해당 세션 없음'); return; }
+            sEl.innerHTML = list.map(s => `
+    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}',this)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+        <div class="rname" style="font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fmtId(s.start_at, s.phone)}</div>
+        <select class="rstatus rs-${esc(s.review_status||'미확인')}" onclick="event.stopPropagation()" onchange="updateReviewStatus(${s.id},this.value,this)">
+          <option value="미확인" ${(s.review_status||'미확인')==='미확인'?'selected':''}>미확인</option>
+          <option value="가망" ${(s.review_status||'')==='가망'?'selected':''}>가망</option>
+          <option value="비가망" ${(s.review_status||'')==='비가망'?'selected':''}>비가망</option>
+        </select>
+      </div>
+      <div class="smeta">
+        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
+      </div>
+    </div>
+  `).join('');
+        }
         async function pickPhone(key, phone) {
             selPhKey = key;
             renderPhones(allPhones.filter(p => (p.phone || '').includes(document.getElementById('srchinp').value)));
@@ -694,18 +875,12 @@
             sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
             resetChat();
             const data = await api(`/api/counselor/phones/${encodeURIComponent(key)}/sessions`);
-            if (!data || !data.length) { sEl.innerHTML = mkEmpty('📋', '세션 없음'); return; }
-            sEl.innerHTML = data.map(s => `
-    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}',this)">
-      <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)}</div>
-      <div class="smeta">
-        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
-        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
-      </div>
-    </div>
-  `).join('');
+            allSessions = data || [];
+            if (!allSessions.length) { sEl.innerHTML = mkEmpty('📋', '세션 없음'); return; }
+            renderSessions();
         }
         async function pickSess(id, sid, phone, el) {
+            curSessId = id;
             document.querySelectorAll('#sessList .row').forEach(x => x.classList.remove('active'));
             el.classList.add('active');
             const phpEl = document.getElementById('chatPhone');
@@ -716,10 +891,11 @@
             const chat = document.getElementById('chatArea');
             chat.innerHTML = `<div class="loading"><div class="spin"></div>대화 내역 불러오는 중</div>`;
             const data = await api(`/api/sessions/${id}/messages`);
-            if (!data || !data.length) { chat.innerHTML = mkEmpty('💬', '대화 내역이 없습니다'); return; }
-            const badge = document.getElementById('chatBadge');
-            badge.textContent = `${data.length}개 메시지`; badge.style.display = 'inline-block';
-            chat.innerHTML = data.map(m => `
+            if (!data || !data.length) { chat.innerHTML = mkEmpty('💬', '대화 내역이 없습니다'); }
+            else {
+                const badge = document.getElementById('chatBadge');
+                badge.textContent = `${data.length}개 메시지`; badge.style.display = 'inline-block';
+                chat.innerHTML = data.map(m => `
     <div class="mrow ${m.role} fi">
       <div class="mavt ${m.role}">${m.role === 'user' ? '👤' : '🤖'}</div>
       <div class="mbody">
@@ -729,14 +905,39 @@
       </div>
     </div>
   `).join('');
-            chat.scrollTop = chat.scrollHeight;
+                chat.scrollTop = chat.scrollHeight;
+            }
+            loadMemo(id);
+        }
+        async function loadMemo(id) {
+            document.getElementById('memoWrap').style.display = 'flex';
+            document.getElementById('vRh').style.display = 'block';
+            const r = await fetch(`/api/sessions/${id}/memo`).then(x => x.json()).catch(() => null);
+            document.getElementById('memoText').value = r && r.success ? (r.memo || '') : '';
+        }
+        async function updateReviewStatus(sessionId, val, sel) {
+            sel.className = `rstatus rs-${val}`;
+            const s = allSessions.find(x => x.id === sessionId);
+            if (s) s.review_status = val;
+            await fetch(`/api/sessions/${sessionId}/review-status`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: val })
+            });
+        }
+        async function saveMemo() {
+            if (!curSessId) return;
+            const memo = document.getElementById('memoText').value;
+            await fetch(`/api/sessions/${curSessId}/memo`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ memo }) });
         }
         function resetChat() {
+            curSessId = null;
             const p = document.getElementById('chatPhone');
             p.textContent = '세션을 선택하세요'; p.style.cssText = 'font-size:13px;font-weight:600;color:var(--muted)';
             document.getElementById('chatSid').textContent = '';
             document.getElementById('chatBadge').style.display = 'none';
             document.getElementById('chatArea').innerHTML = mkEmpty('💬', '세션을 선택하세요');
+            document.getElementById('memoWrap').style.display = 'none';
+            document.getElementById('vRh').style.display = 'none';
         }
         async function logout() { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/'; }
         async function api(u) { try { const r = await fetch(u); const d = await r.json(); return d.success ? d.data : null; } catch { return null; } }
@@ -746,6 +947,65 @@
         function fmtId(dt, phone) { if (!dt) return phone || '번호없음'; const d = parseUtc(dt); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}${m}${day}_${phone || '번호없음'}`; }
         function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
         function mkEmpty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
+    </script>
+    <script>
+        // Resizable panels
+        (function () {
+            document.querySelectorAll('.resize-handle').forEach(function (handle) {
+                handle.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    var leftCol = handle.previousElementSibling;
+                    var startX = e.clientX;
+                    var startW = leftCol.getBoundingClientRect().width;
+                    handle.classList.add('dragging');
+                    document.body.style.userSelect = 'none';
+                    document.body.style.cursor = 'col-resize';
+                    function onMove(e) {
+                        var dx = e.clientX - startX;
+                        var newW = Math.max(0, startW + dx);
+                        leftCol.style.width = newW + 'px';
+                        leftCol.style.flex = 'none';
+                    }
+                    function onUp() {
+                        handle.classList.remove('dragging');
+                        document.body.style.userSelect = '';
+                        document.body.style.cursor = '';
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    }
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                });
+            });
+        })();
+
+        // Vertical resize (chat ↔ memo)
+        (function () {
+            var vRh = document.getElementById('vRh');
+            vRh.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                var memoWrap = document.getElementById('memoWrap');
+                var startY = e.clientY;
+                var startH = memoWrap.getBoundingClientRect().height;
+                vRh.classList.add('dragging');
+                document.body.style.userSelect = 'none';
+                document.body.style.cursor = 'row-resize';
+                function onMove(e) {
+                    var dy = e.clientY - startY;
+                    var newH = Math.max(40, startH - dy);
+                    memoWrap.style.height = newH + 'px';
+                }
+                function onUp() {
+                    vRh.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                    document.body.style.cursor = '';
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        })();
     </script>
 </body>
 

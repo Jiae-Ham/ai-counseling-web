@@ -166,10 +166,33 @@
             flex-direction: column;
             overflow: hidden;
             background: #fff;
+            flex-shrink: 0;
+            width: 240px;
+        }
+
+        .pcol:nth-child(3) {
+            width: 260px;
         }
 
         .pcol:last-child {
             border-right: none;
+            flex: 1;
+            flex-shrink: 1;
+            width: auto;
+        }
+
+        .resize-handle {
+            width: 5px;
+            cursor: col-resize;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.1s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .resize-handle:hover, .resize-handle.dragging {
+            background: var(--blue);
         }
 
         .phdr {
@@ -288,6 +311,65 @@
             flex-wrap: wrap;
         }
 
+        .rstatus {
+            font-size: 11px;
+            font-family: inherit;
+            font-weight: 600;
+            border-radius: 5px;
+            border: 1.5px solid var(--border2);
+            background: #fff;
+            color: var(--text);
+            padding: 1px 4px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .rstatus.rs-가망 { border-color: #6ee7b7; color: #065f46; background: #ecfdf5; }
+        .rstatus.rs-비가망 { border-color: #fca5a5; color: #b91c1c; background: #fef2f2; }
+        .rstatus.rs-미확인 { border-color: var(--border2); color: var(--muted); background: #f9fafb; }
+
+        .date-filter-bar {
+            display: flex;
+            gap: 4px;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-filter-bar input[type="date"] {
+            font-size: 11px;
+            font-family: inherit;
+            border: 1.5px solid var(--border2);
+            border-radius: 5px;
+            padding: 2px 5px;
+            color: var(--text);
+            background: #fff;
+            outline: none;
+        }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            line-height: 1;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        .btn-del:hover { opacity: 1; }
+
+        .sess-chk {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: var(--blue);
+        }
+
         .badge {
             font-size: 10px;
             padding: 2px 7px;
@@ -369,10 +451,10 @@
         .chatarea {
             flex: 1;
             overflow-y: auto;
-            padding: 18px 22px;
+            padding: 10px 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 2px;
             background: var(--bg);
         }
 
@@ -388,7 +470,7 @@
         /* USER = LEFT, AI = RIGHT */
         .mrow {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             max-width: 78%;
         }
 
@@ -439,10 +521,10 @@
         }
 
         .mbubl {
-            padding: 9px 13px;
-            border-radius: 13px;
-            font-size: 13px;
-            line-height: 1.65;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.55;
             word-break: break-word;
         }
 
@@ -465,6 +547,68 @@
         }
 
         /* === TAB 1 === */
+        /* ── 모달 ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px 28px 22px;
+            width: 320px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+        }
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .modal-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+        .modal-inp {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            outline: none;
+            margin-bottom: 16px;
+        }
+        .modal-inp:focus { border-color: var(--blue); }
+        .modal-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .modal-btns button {
+            padding: 7px 18px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border2);
+            background: #fff;
+            color: var(--text);
+        }
+        .modal-btns .btn-confirm {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+
         .stafflayout {
             display: grid;
             grid-template-columns: 1fr 300px;
@@ -575,6 +719,43 @@
 
         .btn-del:hover {
             background: #fee2e2;
+        }
+
+        .btn-pw {
+            border-color: var(--blue);
+            color: var(--blue);
+            background: #eff6ff;
+        }
+
+        .btn-pw:hover {
+            background: #dbeafe;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 4px;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .fbtn {
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1.5px solid var(--border2);
+            background: #fff;
+            color: var(--dim);
+            font-weight: 600;
+            transition: all .15s;
+        }
+
+        .fbtn.active {
+            border-color: var(--blue);
+            color: var(--blue);
+            background: #eff6ff;
         }
 
         .fcard {
@@ -1041,7 +1222,7 @@
 
         <!-- TAB 3 -->
         <div id="tab-view" class="tp">
-            <div style="display:grid;grid-template-columns:240px 260px 1fr;flex:1;overflow:hidden;">
+            <div style="display:flex;flex:1;overflow:hidden;">
                 <!-- 전화번호 목록 -->
                 <div class="pcol">
                     <div class="phdr">
@@ -1049,6 +1230,16 @@
                             <div class="ptitle">전화번호</div>
                             <div class="psub" id="v-phoneCnt">불러오는 중...</div>
                         </div>
+                    </div>
+                    <div class="filter-bar">
+                        <button class="fbtn active" id="pf-with" onclick="setPhoneFilter('with')">번호 있음</button>
+                        <button class="fbtn" id="pf-without" onclick="setPhoneFilter('without')">번호 없음</button>
+                    </div>
+                    <div class="date-filter-bar">
+                        <span style="font-size:11px;color:var(--muted);font-weight:600">날짜</span>
+                        <input type="date" id="v-dateFrom" onchange="loadPhones()" />
+                        <span style="font-size:11px;color:var(--muted)">~</span>
+                        <input type="date" id="v-dateTo" onchange="loadPhones()" />
                     </div>
                     <div class="srchwrap"><input class="srchinp" id="v-search" type="text" placeholder="전화번호 검색..."
                             oninput="filterPhones()" /></div>
@@ -1058,11 +1249,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="resize-handle"></div>
                 <!-- 세션 목록 -->
                 <div class="pcol">
                     <div class="phdr">
-                        <div class="ptitle">통화 세션</div>
-                        <div class="psub" id="v-sessSub">전화번호를 선택하세요</div>
+                        <div>
+                            <div class="ptitle">통화 세션</div>
+                            <div class="psub" id="v-sessSub">전화번호를 선택하세요</div>
+                        </div>
+                        <button class="bxs btn-off" id="bulkDelBtn" style="display:none;color:#ef4444;border-color:#fca5a5" onclick="bulkDeleteSessions()">선택 삭제 (<span id="selCnt">0</span>)</button>
+                    </div>
+                    <div class="filter-bar">
+                        <button class="fbtn active" id="rf-all" onclick="setReviewFilter('all')">전체</button>
+                        <button class="fbtn" id="rf-가망" onclick="setReviewFilter('가망')">가망</button>
+                        <button class="fbtn" id="rf-비가망" onclick="setReviewFilter('비가망')">비가망</button>
+                        <button class="fbtn" id="rf-미확인" onclick="setReviewFilter('미확인')">미확인</button>
                     </div>
                     <div class="scrollable" id="v-sessList">
                         <div class="empty">
@@ -1071,6 +1272,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="resize-handle"></div>
                 <!-- 대화 내역 -->
                 <div class="pcol" style="background:var(--bg)">
                     <div class="chdr">
@@ -1094,7 +1296,8 @@
     </div>
     <script>
         let selCoId = null, selUn = new Set(), allPhones = [], selPhKey = null;
-        let unData = [], unSort = 'desc'; // 미배분 세션 데이터 및 정렬 상태
+        let unData = [], unSort = 'desc';
+        let phoneFilter = 'with', allSessions = [], sessFilter = 'all', reviewFilter = 'all';
 
         (async () => {
             const me = await fetch('/api/auth/me').then(r => r.json());
@@ -1126,6 +1329,7 @@
       </div>
       <div class="sact">
         ${s.role !== 'admin' ? `<button class="bxs ${s.is_active ? 'btn-on' : 'btn-off'}" onclick="toggleStaff(${s.id})">${s.is_active ? '비활성화' : '활성화'}</button>` : ''}
+        ${s.role !== 'admin' ? `<button class="bxs btn-pw" onclick="changePw(${s.id},'${esc(s.name)}')">비번변경</button>` : ''}
         ${s.role !== 'admin' ? `<button class="bxs btn-del" onclick="delStaff(${s.id},'${esc(s.name)}')">삭제</button>` : ''}
       </div>
     </div>
@@ -1139,6 +1343,28 @@
             else fl('sflash', d.message, 'err');
         }
         async function toggleStaff(id) { await fetch(`/api/admin/staff/${id}/toggle`, { method: 'PATCH' }); loadStaff(); loadCPick(); }
+        let _pwTargetId = null;
+        function changePw(id, name) {
+            _pwTargetId = id;
+            document.getElementById('pwModalTitle').textContent = '비밀번호 변경';
+            document.getElementById('pwModalSub').textContent = `"${name}" 계정의 새 비밀번호를 입력하세요`;
+            document.getElementById('pwModalInput').value = '';
+            document.getElementById('pwModal').classList.add('show');
+            setTimeout(() => document.getElementById('pwModalInput').focus(), 50);
+        }
+        function closePwModal(e) {
+            if (e && e.target !== document.getElementById('pwModal')) return;
+            document.getElementById('pwModal').classList.remove('show');
+            _pwTargetId = null;
+        }
+        async function confirmPwChange() {
+            const pw = document.getElementById('pwModalInput').value.trim();
+            if (!pw || pw.length < 4) { document.getElementById('pwModalInput').focus(); return; }
+            const d = await fetch(`/api/admin/staff/${_pwTargetId}/password`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newPassword: pw }) }).then(r => r.json());
+            document.getElementById('pwModal').classList.remove('show');
+            fl('sflash', d.success ? '비밀번호가 변경됐습니다.' : d.message, d.success ? 'ok' : 'err');
+            _pwTargetId = null;
+        }
         async function delStaff(id, name) {
             if (!confirm(`"${name}" 계정을 삭제하시겠습니까?`)) return;
             await fetch(`/api/admin/staff/${id}`, { method: 'DELETE' }); loadStaff(); loadCPick(); loadUnassigned();
@@ -1260,14 +1486,29 @@
 
         // ── TAB 3 ──────────────────────────────────────────
         async function loadPhones() {
-            const data = await api('/api/admin/phones');
-            allPhones = (data || []).filter(p => p.phone);
+            const df = document.getElementById('v-dateFrom') && document.getElementById('v-dateFrom').value;
+            const dt = document.getElementById('v-dateTo') && document.getElementById('v-dateTo').value;
+            let url = '/api/admin/phones';
+            const qs = [];
+            if (df) qs.push('dateFrom=' + encodeURIComponent(df));
+            if (dt) qs.push('dateTo=' + encodeURIComponent(dt));
+            if (qs.length) url += '?' + qs.join('&');
+            const data = await api(url);
+            allPhones = data || [];
             document.getElementById('v-phoneCnt').textContent = `총 ${allPhones.length}개`;
-            renderPhones(allPhones);
+            filterPhones();
+        }
+        function setPhoneFilter(f) {
+            phoneFilter = f;
+            ['with', 'without'].forEach(k => document.getElementById('pf-' + k).classList.toggle('active', k === f));
+            filterPhones();
         }
         function filterPhones() {
             const q = document.getElementById('v-search').value;
-            renderPhones(allPhones.filter(p => (p.phone || '').includes(q) || (q.startsWith('uid') && !p.phone)));
+            let list = allPhones;
+            if (phoneFilter === 'with') list = list.filter(p => p.phone);
+            else if (phoneFilter === 'without') list = list.filter(p => !p.phone);
+            renderPhones(list.filter(p => (p.phone || '').includes(q) || (q.startsWith('uid') && !p.phone)));
         }
         function renderPhones(list) {
             const el = document.getElementById('v-phoneList');
@@ -1279,9 +1520,43 @@
     </div>
   `).join('');
         }
+        function setSessFilter(f) {
+            sessFilter = f;
+            ['all', 'END', 'CONNECT'].forEach(k => { const el = document.getElementById('sf-' + (k === 'END' ? 'end' : k === 'CONNECT' ? 'conn' : 'all')); if (el) el.classList.toggle('active', k === f); });
+            renderSessions();
+        }
+        function setReviewFilter(f) {
+            reviewFilter = f;
+            ['all', '가망', '비가망', '미확인'].forEach(k => {
+                const el = document.getElementById('rf-' + k);
+                if (el) el.classList.toggle('active', k === f);
+            });
+            renderSessions();
+        }
+        function renderSessions() {
+            const sEl = document.getElementById('v-sessList');
+            let list = allSessions;
+            if (sessFilter !== 'all') list = list.filter(s => (s.status || '').toUpperCase().includes(sessFilter));
+            if (reviewFilter !== 'all') list = list.filter(s => (s.review_status || '미확인') === reviewFilter);
+            if (!list.length) { sEl.innerHTML = empty('📋', '해당 세션 없음'); return; }
+            sEl.innerHTML = list.map(s => `
+    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+        <div class="rname" style="font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fmtId(s.start_at, s.phone)}</div>
+        <span class="rstatus rs-${esc(s.review_status||'미확인')}">${esc(s.review_status||'미확인')}</span>
+        <input type="checkbox" class="sess-chk" data-id="${s.id}" onclick="event.stopPropagation();toggleSessChk(${s.id},this)" />
+      </div>
+      <div class="smeta">
+        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
+        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
+        ${s.counselor_name ? `<span style="font-size:11px;color:var(--purple);font-weight:600">👤${esc(s.counselor_name)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+        }
         async function pickPhone(key, phone) {
             selPhKey = key;
-            renderPhones(allPhones.filter(p => (p.phone || '').includes(document.getElementById('v-search').value)));
+            filterPhones();
             document.getElementById('v-sessSub').textContent = phone || key;
             const sEl = document.getElementById('v-sessList');
             sEl.innerHTML = `<div class="loading"><div class="spin"></div>불러오는 중</div>`;
@@ -1291,17 +1566,11 @@
             document.getElementById('v-chatSid').textContent = '';
             document.getElementById('v-msgBadge').style.display = 'none';
             const data = await api(`/api/admin/phones/${encodeURIComponent(key)}/sessions`);
-            if (!data || !data.length) { sEl.innerHTML = empty('📋', '대화 있는 세션 없음'); return; }
-            sEl.innerHTML = data.map(s => `
-    <div class="row fi" onclick="pickSess(${s.id},'${esc(s.session_id || '')}','${esc(s.phone || '')}','${esc(s.counselor_name || '')}',this)">
-      <div class="rname" style="font-size:13px">${fmtId(s.start_at, s.phone)}</div>
-      <div class="smeta">
-        <span class="badge ${bg(s.status)}">${s.status || '?'}</span>
-        <span style="font-size:11px;color:var(--dim)">${fmt(s.start_at)}</span>
-        ${s.counselor_name ? `<span style="font-size:11px;color:var(--purple);font-weight:600">👤${esc(s.counselor_name)}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
+            allSessions = data || [];
+            selectedSessions.clear();
+            document.getElementById('bulkDelBtn').style.display = 'none';
+            if (!allSessions.length) { sEl.innerHTML = empty('📋', '대화 있는 세션 없음'); return; }
+            renderSessions();
         }
         async function pickSess(id, sid, phone, counselor, el) {
             document.querySelectorAll('#v-sessList .row').forEach(x => x.classList.remove('active'));
@@ -1343,7 +1612,82 @@
         function bg(s) { if (!s) return 'b-d'; const u = s.toUpperCase(); if (u.includes('CONNECT') || u.includes('ANSWER')) return 'b-c'; if (u.includes('END')) return 'b-e'; if (u.includes('RING')) return 'b-r'; return 'b-d'; }
         function empty(ico, txt) { return `<div class="empty"><div class="ei">${ico}</div><div class="et">${txt}</div></div>`; }
         function fl(id, msg, type) { const el = document.getElementById(id); el.innerHTML = `<div class="flash ${type}">${msg}</div>`; setTimeout(() => { el.innerHTML = ''; }, 3000); }
+        let selectedSessions = new Set();
+        function toggleSessChk(id, el) {
+            if (el.checked) selectedSessions.add(id);
+            else selectedSessions.delete(id);
+            const cnt = selectedSessions.size;
+            const btn = document.getElementById('bulkDelBtn');
+            const cntEl = document.getElementById('selCnt');
+            btn.style.display = cnt > 0 ? '' : 'none';
+            if (cntEl) cntEl.textContent = cnt;
+        }
+        async function bulkDeleteSessions() {
+            const cnt = selectedSessions.size;
+            if (!cnt) return;
+            if (!confirm(`선택한 ${cnt}개 세션을 삭제하시겠습니까?\n대화 내역과 메모가 모두 삭제됩니다.`)) return;
+            for (const id of selectedSessions) {
+                await fetch(`/api/admin/sessions/${id}`, { method: 'DELETE' }).catch(() => null);
+            }
+            allSessions = allSessions.filter(s => !selectedSessions.has(s.id));
+            selectedSessions.clear();
+            document.getElementById('bulkDelBtn').style.display = 'none';
+            renderSessions();
+        }
+        async function updateReviewStatus(sessionId, val, sel) {
+            sel.className = `rstatus rs-${val}`;
+            const s = allSessions.find(x => x.id === sessionId);
+            if (s) s.review_status = val;
+            await fetch(`/api/sessions/${sessionId}/review-status`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: val })
+            });
+        }
     </script>
+    <script>
+        // Resizable panels
+        (function () {
+            document.querySelectorAll('.resize-handle').forEach(function (handle) {
+                handle.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    var leftCol = handle.previousElementSibling;
+                    var startX = e.clientX;
+                    var startW = leftCol.getBoundingClientRect().width;
+                    handle.classList.add('dragging');
+                    document.body.style.userSelect = 'none';
+                    document.body.style.cursor = 'col-resize';
+                    function onMove(e) {
+                        var dx = e.clientX - startX;
+                        var newW = Math.max(0, startW + dx);
+                        leftCol.style.width = newW + 'px';
+                        leftCol.style.flex = 'none';
+                    }
+                    function onUp() {
+                        handle.classList.remove('dragging');
+                        document.body.style.userSelect = '';
+                        document.body.style.cursor = '';
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    }
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                });
+            });
+        })();
+    </script>
+
+    <!-- 비밀번호 변경 모달 -->
+    <div class="modal-overlay" id="pwModal" onclick="closePwModal(event)">
+        <div class="modal-box">
+            <div class="modal-title" id="pwModalTitle">비밀번호 변경</div>
+            <div class="modal-sub" id="pwModalSub"></div>
+            <input class="modal-inp" type="password" id="pwModalInput" placeholder="새 비밀번호 입력 (4자 이상)" />
+            <div class="modal-btns">
+                <button onclick="closePwModal()">취소</button>
+                <button class="btn-confirm" onclick="confirmPwChange()">변경</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
