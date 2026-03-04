@@ -1208,6 +1208,8 @@
                             <button class="bxs btn-off" onclick="loadUnassigned()">새로고침</button>
                         </div>
                     </div>
+                    <div class="srchwrap"><input class="srchinp" id="un-search" type="text" placeholder="전화번호 검색..."
+                            oninput="filterUnassigned()" /></div>
                     <div id="aflash"></div>
                     <div class="scrollable" id="unList">
                         <div class="loading">
@@ -1411,18 +1413,24 @@
             const data = await api('/api/admin/sessions/unassigned');
             unData = (data || []).filter(s => s.phone);
             document.getElementById('ucnt').textContent = data ? `${unData.length}건 (대화 있음)` : '실패';
-            renderUnassigned();
+            filterUnassigned();
+        }
+        function filterUnassigned() {
+            const q = (document.getElementById('un-search').value || '').trim();
+            const filtered = q ? unData.filter(s => (s.phone || '').includes(q)) : unData;
+            renderUnassigned(filtered);
         }
         function toggleSort() {
             unSort = unSort === 'desc' ? 'asc' : 'desc';
             const btn = document.getElementById('sortBtn');
             btn.textContent = unSort === 'desc' ? '↓ 최신순' : '↑ 오래된순';
-            renderUnassigned();
+            filterUnassigned();
         }
-        function renderUnassigned() {
+        function renderUnassigned(filtered) {
             const el = document.getElementById('unList');
-            if (!unData.length) { el.innerHTML = empty('✅', '미배분 상담이 없습니다'); return; }
-            const sorted = [...unData].sort((a, b) => {
+            const list = filtered !== undefined ? filtered : unData;
+            if (!list.length) { el.innerHTML = empty('✅', unData.length ? '검색 결과 없음' : '미배분 상담이 없습니다'); return; }
+            const sorted = [...list].sort((a, b) => {
                 const ta = new Date(a.start_at), tb = new Date(b.start_at);
                 return unSort === 'desc' ? tb - ta : ta - tb;
             });
@@ -1695,12 +1703,14 @@
             btn.textContent = '삭제 중...';
             btn.disabled = true;
             let successCnt = 0, failCnt = 0;
+            let lastErrMsg = '';
             for (const id of selectedSessions) {
                 try {
                     const r = await fetch(`/api/admin/sessions/${id}`, { method: 'DELETE' });
                     const d = await r.json();
-                    if (d.success) successCnt++; else failCnt++;
-                } catch { failCnt++; }
+                    if (d.success) successCnt++;
+                    else { failCnt++; lastErrMsg = d.message || '알 수 없는 오류'; }
+                } catch (e) { failCnt++; lastErrMsg = e.message || '네트워크 오류'; }
             }
             selectedSessions.clear();
             btn.style.display = 'none';
@@ -1717,7 +1727,7 @@
             const prevTxt = sub.textContent;
             if (failCnt > 0) {
                 sub.style.color = 'var(--err)';
-                sub.textContent = `✗ ${failCnt}건 삭제 실패 (${successCnt}건 성공)`;
+                sub.textContent = `✗ ${failCnt}건 삭제 실패: ${lastErrMsg}`;
             } else {
                 sub.style.color = 'var(--ok)';
                 sub.textContent = `✓ ${successCnt}건 삭제 완료`;
