@@ -191,6 +191,10 @@ app.delete('/api/admin/staff/:id', requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── 공통 필터 조건 설명 ──
+// 조건1: 첫 번째 user 메시지에 '감사합니다' / '감자합니다' / '감자입니다' 포함 시 제외
+// 조건2: 세션 전체 user 메시지가 모두 '어+' 형태만인 경우 제외
+
 // 미배분 세션 목록 (관리자용) — 대화 있는 세션만
 app.get('/api/admin/sessions/unassigned', requireAdmin, async (req, res) => {
   try {
@@ -208,6 +212,9 @@ app.get('/api/admin/sessions/unassigned', requireAdmin, async (req, res) => {
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -239,6 +246,9 @@ app.get('/api/admin/staff/:id/sessions', requireAdmin, async (req, res) => {
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -301,6 +311,9 @@ app.post('/api/admin/auto-assign', requireAdmin, async (req, res) => {
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -372,6 +385,9 @@ app.get('/api/admin/phones', requireAdmin, async (req, res) => {
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -420,6 +436,9 @@ app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) =
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -459,6 +478,9 @@ app.get('/api/counselor/phones', requireAuth, async (req, res) => {
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
@@ -502,6 +524,9 @@ app.get('/api/counselor/phones/:phoneKey/sessions', requireAuth, async (req, res
          AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
               WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
               ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자입니다%'
          AND NOT (
            (SELECT COUNT(*) FROM conversation_message cm
             WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
