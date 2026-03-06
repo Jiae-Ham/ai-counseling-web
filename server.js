@@ -202,6 +202,20 @@ app.get('/api/admin/sessions/unassigned', requireAdmin, async (req, res) => {
        JOIN users u ON cs.user_id = u.id
        WHERE cs.counselor_id IS NULL
          AND (SELECT COUNT(*) FROM conversation_message WHERE session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        ORDER BY cs.start_at DESC`
     );
     res.json({ success: true, data: rows });
@@ -219,6 +233,20 @@ app.get('/api/admin/staff/:id/sessions', requireAdmin, async (req, res) => {
        JOIN users u ON cs.user_id = u.id
        WHERE cs.counselor_id = ?
          AND (SELECT COUNT(*) FROM conversation_message WHERE session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        ORDER BY cs.start_at DESC`,
       [req.params.id]
     );
@@ -267,6 +295,20 @@ app.post('/api/admin/auto-assign', requireAdmin, async (req, res) => {
       `SELECT cs.id FROM call_session cs
        WHERE cs.counselor_id IS NULL
          AND (SELECT COUNT(*) FROM conversation_message WHERE session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        ORDER BY cs.start_at ASC LIMIT ?`,
       [limit]
     );
@@ -314,7 +356,7 @@ app.get('/api/admin/phones', requireAdmin, async (req, res) => {
     let dateWhere = '';
     const params = [];
     if (dateFrom) { dateWhere += ' AND cs.start_at >= ?'; params.push(dateFrom + ' 00:00:00'); }
-    if (dateTo)   { dateWhere += ' AND cs.start_at <= ?'; params.push(dateTo   + ' 23:59:59'); }
+    if (dateTo) { dateWhere += ' AND cs.start_at <= ?'; params.push(dateTo + ' 23:59:59'); }
     const [rows] = await pool.query(
       `SELECT
          COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))) AS phone_key,
@@ -324,6 +366,20 @@ app.get('/api/admin/phones', requireAdmin, async (req, res) => {
        FROM users u
        JOIN call_session cs ON cs.user_id = u.id
        WHERE (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
          ${dateWhere}
        GROUP BY COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))), u.phone
        ORDER BY MAX(cs.start_at) DESC`,
@@ -347,7 +403,7 @@ app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) =
       params = [key];
     }
     if (dateFrom) { whereClause += ' AND cs.start_at >= ?'; params.push(dateFrom + ' 00:00:00'); }
-    if (dateTo)   { whereClause += ' AND cs.start_at <= ?'; params.push(dateTo   + ' 23:59:59'); }
+    if (dateTo) { whereClause += ' AND cs.start_at <= ?'; params.push(dateTo + ' 23:59:59'); }
     const [rows] = await pool.query(
       `SELECT cs.id, cs.session_id, cs.status, cs.review_status, cs.start_at, cs.end_at,
               u.name, u.phone,
@@ -358,6 +414,20 @@ app.get('/api/admin/phones/:phoneKey/sessions', requireAdmin, async (req, res) =
        LEFT JOIN staff s ON cs.counselor_id = s.id
        WHERE ${whereClause}
          AND (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        ORDER BY cs.start_at DESC`,
       params
     );
@@ -383,6 +453,20 @@ app.get('/api/counselor/phones', requireAuth, async (req, res) => {
        JOIN call_session cs ON cs.user_id = u.id
        WHERE cs.counselor_id = ?
          AND (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        GROUP BY COALESCE(u.phone, CONCAT('uid-', CAST(u.id AS CHAR))), u.phone
        ORDER BY MAX(cs.start_at) DESC`,
       [req.session.staff.id]
@@ -412,6 +496,20 @@ app.get('/api/counselor/phones/:phoneKey/sessions', requireAuth, async (req, res
        JOIN users u ON cs.user_id = u.id
        WHERE ${whereClause}
          AND (SELECT COUNT(*) FROM conversation_message cm WHERE cm.session_id = cs.id) > 0
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감사합니다%'
+         AND (SELECT TRIM(cm_f.content) FROM conversation_message cm_f
+              WHERE cm_f.session_id = cs.id AND cm_f.role = 'user'
+              ORDER BY cm_f.created_at ASC LIMIT 1) NOT LIKE '%감자합니다%'
+         AND NOT (
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user') > 0
+           AND
+           (SELECT COUNT(*) FROM conversation_message cm
+            WHERE cm.session_id = cs.id AND cm.role = 'user'
+              AND TRIM(cm.content) NOT REGEXP '^어+$') = 0
+         )
        ORDER BY cs.start_at DESC`,
       params
     );
